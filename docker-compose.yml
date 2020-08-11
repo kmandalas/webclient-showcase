@@ -1,0 +1,28 @@
+version: '3.5'
+
+services:
+
+  consul:
+    image: consul:latest
+    command: agent -server -ui -node=server1 -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - consul-net
+
+  gateway-service:
+    restart: on-failure
+    build: gateway-service/.
+    image: webclient-showcase/gateway-service:1
+    ports:
+      - "8000:8000"
+    networks:
+      - consul-net
+    environment:
+      - CONSUL_HOST=consul
+      - CONFIGSERVER_PORT=8500
+
+networks:
+  consul-net:
+    driver: bridge
