@@ -39,6 +39,8 @@ Moreover it supports sync, async, and streaming scenarios.
 
 ### Other topics
 
+#### BlockHound
+
 #### Logging
 
 #### Async SOAP
