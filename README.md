@@ -10,7 +10,8 @@ In this scenario, the servlet spec can be switched to an architecture created up
 This kind of architecture fits better than servlet for the cloud environments.
 Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [1].
 
-In this demo we will focus on the reactive WebClient component and built various scenarios based on a minimal Microservices architecture.
+In this demo we will focus on the reactive WebClient component making calls to remote services. 
+We built various scenarios based on a minimal Microservices architecture and demonstrate a number of capabilities by example.
 With the reactive WebClient we can return reactive types (Reactor, RxJava, or other) directly from Spring MVC controller methods. 
 The greater the latency per call or the interdependency among calls, the more dramatic the benefits. 
 Spring MVC controllers can call other reactive components too [2].
