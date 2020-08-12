@@ -48,8 +48,8 @@ Moreover it supports sync, async, and streaming scenarios.
 ## Conclusion
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally do not make applications run faster. 
-They can, in some cases, (for example, if using the WebClient to run remote calls in parallel). 
-On the whole, it requires more work to do things the non-blocking way and that can slightly increase the required processing time.
+They can, in some cases, for example when using the WebClient to run remote calls in parallel while at the same time avoiding
+getting involved with Task Executors and use a more elegant and fluent API instead. It comes of course with a learning curve.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small, fixed number of threads and less memory. 
 That makes applications more resilient under load, because they scale in a more predictable way. 
