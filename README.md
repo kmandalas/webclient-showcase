@@ -28,7 +28,7 @@ Moreover it supports sync, async, and streaming scenarios.
 
 ### Parallel calls to different endpoints
 
-### .zip VS .zipWhen VS .zipDelayError VS .zipOnNext VS 
+### .zip VS .zipWhen VS .zipDelayError VS .zipOnNext
 
 ### .doOnNext VS .doOnSuccess VS .doOnError
 
@@ -45,6 +45,7 @@ Moreover it supports sync, async, and streaming scenarios.
 #### Logging
 
 #### Async SOAP
+Based on [6] but with ApacheCXF instead
 
 ## Conclusion
 
@@ -66,3 +67,7 @@ That is where the reactive stack begins to show its strengths, and the differenc
 [3] https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-performance
 
 [4] https://medium.com/@filia.aleks/microservice-performance-battle-spring-mvc-vs-webflux-80d39fd81bf0
+
+[5]* https://allegro.tech/2019/07/migrating-microservice-to-spring-webflux.html
+
+[6] https://godatadriven.com/blog/reactive-web-service-client-with-jax-ws/
