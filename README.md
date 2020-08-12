@@ -71,3 +71,5 @@ That is where the reactive stack begins to show its strengths, and the differenc
 [5]* https://allegro.tech/2019/07/migrating-microservice-to-spring-webflux.html
 
 [6] https://godatadriven.com/blog/reactive-web-service-client-with-jax-ws/
+
+[7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M&t=11s (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
