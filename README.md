@@ -12,9 +12,10 @@ Spring Framework has been creating the Spring WebFlux to helps developers to cre
 
 In this demo we will primarily focus on the reactive WebClient component making calls to remote services. 
 We built various scenarios based on a minimal Microservices architecture and demonstrate a number of capabilities by example.
-With the reactive WebClient we can return reactive types (Reactor, RxJava, or other) directly from Spring MVC controller methods. 
-The greater the latency per call or the interdependency among calls, the more dramatic the benefits. 
-Spring MVC controllers can call other reactive components too [2].
+With the reactive WebClient we can return reactive types (Reactor, RxJava, or other) directly from Spring MVC controller methods.
+Spring MVC controllers can call other reactive components too. 
+
+The greater the latency per call or the interdependency among calls, the more dramatic the benefits [2].
 
 **NOTE:** As of Spring version 5.0 the `org.springframework.web.client.RestTemplate` class is in maintenance mode, 
 with only minor requests for changes and bugs to be accepted going forward. 
