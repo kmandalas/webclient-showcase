@@ -8,11 +8,12 @@ Usually, in a cloud environment, the machines are smaller than traditional data-
 Instead of a big machine, it is popular to use many small machines and try to scale applications horizontally. 
 In this scenario, the servlet spec can be switched to an architecture created upon Reactive Streams. 
 This kind of architecture fits better than servlet for the cloud environments.
-Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [1].
+Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [1](https://www.packtpub.com/application-development/developing-java-applications-spring-and-spring-boot).
 
 In this demo we will primarily focus on the reactive WebClient component making calls to remote services which is actually a good starting point
-and a pretty common case. As stated in [2] the greater the latency per call or the interdependency among calls, 
-the more dramatic the performance benefits are.An extra motivation for this approach is the fact that since Spring version 5.0, 
+and a pretty common case. As stated in [2](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-framework-choice) 
+the greater the latency per call or the interdependency among calls, the more dramatic the performance benefits are. 
+An extra motivation for this approach is the fact that since Spring version 5.0, 
 the `org.springframework.web.client.RestTemplate` class is in maintenance mode, with only minor requests for changes and bugs to be accepted 
 going forward. Therefore, it is advised to start using the `org.springframework.web.reactive.client.WebClient` which has a more modern API.
 Moreover it supports sync, async, and streaming scenarios.
@@ -25,7 +26,7 @@ which we want to migrate gradually etc.
 
 ## Project structure
 
-In order to demonstrate the usage of WebClient for service-to-service communication we will use Spring Cloud with Consul for service discovery.
+In order to demonstrate the usage of WebClient for service-to-service communication we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery.
 Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
 a PostgreSQL database using a reactive driver. A diagram of our components is shown below:
 
@@ -64,6 +65,14 @@ However a couple of practical issues that you may face with real-world applicati
 
 #### Async SOAP
 Based on [6] but with ApacheCXF instead
+
+### How to run
+
+#### Integration tests
+mvn clean verify
+
+#### Live tests
+docker-compose up
 
 ## Conclusion
 
