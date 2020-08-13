@@ -83,12 +83,12 @@ getting involved with Task Executors and use a more elegant and fluent API inste
 The key expected benefit of reactive and non-blocking is the ability to scale with a small, fixed number of threads and less memory. 
 That makes applications more resilient under load, because they scale in a more predictable way. 
 In order to observe those benefits, however, you need to have some latency (including a mix of slow and unpredictable network I/O). 
-That is where the reactive stack begins to show its strengths, and the differences can be dramatic [3].
+That is where the reactive stack begins to show its strengths, and the differences can be dramatic [[3]](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-performance).
 
 Some interesting load testing and comparison results are presented at [Spring Boot performance battle: blocking vs non-blocking vs reactive](https://medium.com/@filia.aleks/microservice-performance-battle-spring-mvc-vs-webflux-80d39fd81bf0). 
-The conclusion is that Spring Webflux with WebClient and Apache clients wins in all cases. 
-The most significant difference (4 times faster than blocking Servlet) when underlying service is slow (500ms). 
-It's 15–20% faster then Non-blocking Servlet with `CompetableFuture`. Also, it does not create a lot of threads comparing with Servlet (20 vs 220).
+The conclusion is that Spring Webflux with WebClient and Apache clients "win" in all cases. 
+The most significant difference (4 times faster than blocking Servlet) comes when underlying service is slow (500ms). 
+It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it does not create a lot of threads comparing with Servlet (20 vs 220).
 
 ## References
 
