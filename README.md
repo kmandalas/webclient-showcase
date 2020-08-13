@@ -8,10 +8,10 @@ Usually, in a cloud environment, the machines are smaller than traditional data-
 Instead of a big machine, it is popular to use many small machines and try to scale applications horizontally. 
 In this scenario, the servlet spec can be switched to an architecture created upon Reactive Streams. 
 This kind of architecture fits better than servlet for the cloud environments.
-Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [1](https://www.packtpub.com/application-development/developing-java-applications-spring-and-spring-boot).
+Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [[1]](https://www.packtpub.com/application-development/developing-java-applications-spring-and-spring-boot).
 
 In this demo we will primarily focus on the reactive WebClient component making calls to remote services which is actually a good starting point
-and a pretty common case. As stated in [2](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-framework-choice) 
+and a pretty common case. As stated in [[2]](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-framework-choice) 
 the greater the latency per call or the interdependency among calls, the more dramatic the performance benefits are. 
 An extra motivation for this approach is the fact that since Spring version 5.0, 
 the `org.springframework.web.client.RestTemplate` class is in maintenance mode, with only minor requests for changes and bugs to be accepted 
