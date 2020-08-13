@@ -10,17 +10,28 @@ In this scenario, the servlet spec can be switched to an architecture created up
 This kind of architecture fits better than servlet for the cloud environments.
 Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [1].
 
-In this demo we will primarily focus on the reactive WebClient component making calls to remote services. 
-We built various scenarios based on a minimal Microservices architecture and demonstrate a number of capabilities by example.
-With the reactive WebClient we can return reactive types (Reactor, RxJava, or other) directly from Spring MVC controller methods.
-Spring MVC controllers can call other reactive components too. 
-
-The greater the latency per call or the interdependency among calls, the more dramatic the benefits [2].
-
-**NOTE:** As of Spring version 5.0 the `org.springframework.web.client.RestTemplate` class is in maintenance mode, 
-with only minor requests for changes and bugs to be accepted going forward. 
-Therefore, it is advised to start using the `org.springframework.web.reactive.client.WebClient` which has a more modern API.
+In this demo we will primarily focus on the reactive WebClient component making calls to remote services which is actually a good starting point
+and a pretty common case. As stated in [2] the greater the latency per call or the interdependency among calls, 
+the more dramatic the performance benefits are.An extra motivation for this approach is the fact that since Spring version 5.0, 
+the `org.springframework.web.client.RestTemplate` class is in maintenance mode, with only minor requests for changes and bugs to be accepted 
+going forward. Therefore, it is advised to start using the `org.springframework.web.reactive.client.WebClient` which has a more modern API.
 Moreover it supports sync, async, and streaming scenarios.
+
+We built a sample application based on a minimal Microservices architecture and demonstrate a number of capabilities driven by the requirements
+of each use-case. With the reactive WebClient we can return reactive types (e.g. Flux or Mono) directly from Spring MVC controller methods.
+Spring MVC controllers can call other reactive components too. A mix is also possible in case we have some endpoints and services which cannot
+become reactive for a number of reasons such as: blocking dependencies with no reactive alternatives or we may have an existing legacy app 
+which we want to migrate gradually etc.
+
+## Project structure
+
+In order to demonstrate the usage of WebClient for service-to-service communication we will use Spring Cloud with Consul for service discovery.
+Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
+a PostgreSQL database using a reactive driver. A diagram of our components is shown below:
+
+[diagram]
+
+We have Integration tests covering each microservice endpoint and we use [WireMock](http://wiremock.org) and [Testcontainers](https://www.testcontainers.org) for this purpose. 
 
 ### WebClient simple usage
 
@@ -35,6 +46,13 @@ Moreover it supports sync, async, and streaming scenarios.
 ### Chaining of calls (Sequential execution)
 
 ### Service-to-service communication
+
+We can leverage the WebClient for service-to-service communication as well instead of [Spring Cloud OpenFeign](https://spring.io/projects/spring-cloud-openfeign) or other methods. 
+We usually want to take advantage of client-side load balancing too and this is possible by applying the `@LoadBalanced` annotation.
+
+However a couple of practical issues that you may face with real-world applications are:
+* the need for [Multiple WebClient Objects](https://cloud.spring.io/spring-cloud-commons/2.1.x/multi/multi__spring_cloud_commons_common_abstractions.html#_multiple_webclient_objects)
+* propagate a JWT token in case we have our various endpoints protected
 
 ### Database interaction (r2dbc/postgresql)
 
