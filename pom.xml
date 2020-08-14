@@ -10,6 +10,7 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<parent>
@@ -31,7 +32,7 @@
 	</dependencyManagement>
 
 	<modules>
-<!--		<module>appointment-service</module>-->
+		<module>appointment-service</module>
 <!--		<module>customer-service</module>-->
 		<module>gateway-service</module>
 	</modules>

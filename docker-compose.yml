@@ -21,7 +21,35 @@ services:
       - consul-net
     environment:
       - CONSUL_HOST=consul
-      - CONFIGSERVER_PORT=8500
+      - CONSUL_PORT=8500
+
+  appointment-service:
+    restart: on-failure
+    build: appointment-service/.
+    image: webclient-showcase/appointment-service:1
+    ports:
+      - "8001:8001"
+    networks:
+      - consul-net
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=test
+      - POSTGRES_USER=kmandalas
+      - POSTGRES_PASSWORD=passepartout
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    networks:
+      - consul-net
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: kmandalas
+      POSTGRES_PASSWORD: passepartout
+    ports:
+      - "5432:5432"
 
 networks:
   consul-net:

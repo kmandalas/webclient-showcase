@@ -1,0 +1,29 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: apointment-service
+  cloud:
+    consul:
+      host: ${consul.host:localhost}
+      port: ${consul.port:8500}
+    loadbalancer:
+      ribbon:
+        enabled: false
+  flyway:
+    url: jdbc:postgresql://${postgres.host:localhost}:5432/${postgres.db:test}?currentSchema=demo
+    user: ${postgres.user:kmandalas}
+    password: ${postgres.password:passepartout}
+#    schemas: demo
+#    locations: db/migration
+  r2dbc:
+    url: r2dbc:postgresql://${postgres.host:localhost}:5432/${postgres.db:test}?currentSchema=demo
+    username: ${postgres.user:kmandalas}
+    password: ${postgres.password:passepartout}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
