@@ -22,7 +22,7 @@ We built a sample application based on a minimal Microservices architecture and 
 of each use-case. With the reactive WebClient we can return reactive types (e.g. Flux or Mono) directly from Spring MVC controller methods.
 Spring MVC controllers can call other reactive components too. A mix is also possible in case we have some endpoints and services which cannot
 become reactive for a number of reasons such as: blocking dependencies with no reactive alternatives or we may have an existing legacy app 
-which we want to migrate gradually etc.
+which we want to migrate gradually etc. In our case we will follow the [Annotated Controllers programming model](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-programming-models)
 
 ## Project structure
 
@@ -72,7 +72,7 @@ Based on [6] but with ApacheCXF instead
 mvn clean verify
 
 #### Live tests
-docker-compose up
+docker-compose up --build
 
 ## Conclusion
 
