@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: apointment-service
+    name: appointment-service
   cloud:
     consul:
       host: ${consul.host:localhost}

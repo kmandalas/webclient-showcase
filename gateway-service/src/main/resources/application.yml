@@ -19,13 +19,13 @@ spring:
         - id: appointment-service
           uri: lb://appointment-service
           predicates:
-            - Path=/appointment/**
+            - Path=/appointment-service/**
           filters:
             - StripPrefix=1
         - id: customer-service
           uri: lb://customer-service
           predicates:
-            - Path=/customer/**
+            - Path=/customer-service/**
           filters:
             - StripPrefix=1
       globalcors:

@@ -9,22 +9,22 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("appointment")
+@RequestMapping("/appointment")
 public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
 
+	/** GET request to return all appointments **/
+	@GetMapping
+	Flux<Appointment> findAll() {
+		return appointmentService.findAll();
+	}
+
     /** GET request to return specific appointments **/
-    @GetMapping(path = "/{appointmentId}")
+    @GetMapping("/{appointmentId}")
     public Mono<Appointment> findById(@PathVariable Long appointmentId) {
         return appointmentService.findById(appointmentId);
-    }
-
-    /** GET request to return all appointments **/
-    @GetMapping(path = "/")
-	Flux<Appointment> findAll() {
-        return appointmentService.findAll();
     }
 
     /** POST request to add new appointments **/
@@ -42,7 +42,7 @@ public class AppointmentController {
     }
 
     /** DELETE request to delete specific appointments **/
-    @DeleteMapping(path = "/{appointmentId}")
+    @DeleteMapping("/{appointmentId}")
     @ResponseStatus(HttpStatus.OK)
     Mono<Void> deleteById(@PathVariable Long appointmentId) {
         return appointmentService.deleteById(appointmentId);
