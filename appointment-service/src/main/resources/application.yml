@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: appointment-service
+  mvc:
+    log-request-details: true
   cloud:
     consul:
       host: ${consul.host:localhost}
@@ -27,3 +29,8 @@ management:
     web:
       exposure:
         include: "*"
+
+logging:
+  level:
+    gr.kmandalas: DEBUG
+    org.springframework.web: TRACE
