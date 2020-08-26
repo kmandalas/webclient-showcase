@@ -39,6 +39,22 @@ services:
       - POSTGRES_USER=kmandalas
       - POSTGRES_PASSWORD=passepartout
 
+  customer-service:
+    restart: on-failure
+    build: customer-service/.
+    image: webclient-showcase/customer-service:1
+    ports:
+      - "8002:8002"
+    networks:
+      - consul-net
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=test
+      - POSTGRES_USER=kmandalas
+      - POSTGRES_PASSWORD=passepartout
+
   postgres:
     image: postgres:latest
     restart: always
