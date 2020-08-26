@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 8080
 
 spring:
   application:
@@ -17,8 +17,8 @@ spring:
     url: jdbc:postgresql://${postgres.host:localhost}:5432/${postgres.db:test}?currentSchema=demo
     user: ${postgres.user:kmandalas}
     password: ${postgres.password:passepartout}
-#    schemas: demo
-#    locations: db/migration
+  #    schemas: demo
+  #    locations: db/migration
   r2dbc:
     url: r2dbc:postgresql://${postgres.host:localhost}:5432/${postgres.db:test}?currentSchema=demo
     username: ${postgres.user:kmandalas}
