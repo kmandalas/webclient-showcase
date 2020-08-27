@@ -55,20 +55,18 @@ a PostgreSQL database using a reactive driver. A diagram of our components is sh
 
 We have Integration tests covering each microservice endpoint and we use [WireMock](http://wiremock.org) and [Testcontainers](https://www.testcontainers.org) for this purpose. 
 
-### WebClient simple usage
+### Use cases
 
-### Parallel calls to the same endpoint
+- [ ] WebClient simple usage
+- [ ] Parallel calls to the same endpoint
+- [ ] Parallel calls to the different endpoint
+- [ ] .zip VS .zipWhen VS .zipDelayError VS .zipOnNext
+- [ ] doOnNext VS .doOnSuccess VS .doOnError
+- [ ] Chaining of calls (Sequential execution)
+- [ ] Service-to-service communication
+- [ ] Database interaction (r2dbc/postgresql)
 
-### Parallel calls to different endpoints
-
-### .zip VS .zipWhen VS .zipDelayError VS .zipOnNext
-
-### .doOnNext VS .doOnSuccess VS .doOnError
-
-### Chaining of calls (Sequential execution)
-
-### Service-to-service communication
-
+#### Service-to-service communication
 We can leverage the WebClient for service-to-service communication as well instead of [Spring Cloud OpenFeign](https://spring.io/projects/spring-cloud-openfeign) or other methods. 
 We usually want to take advantage of client-side load balancing too and this is possible by applying the `@LoadBalanced` annotation.
 
@@ -76,13 +74,14 @@ However a couple of practical issues that you may face with real-world applicati
 * the need for [Multiple WebClient Objects](https://cloud.spring.io/spring-cloud-commons/2.1.x/multi/multi__spring_cloud_commons_common_abstractions.html#_multiple_webclient_objects)
 * propagate a JWT token in case we have our various endpoints protected
 
-### Database interaction (r2dbc/postgresql)
-
 ### Other topics
 
 #### BlockHound
 
 #### Logging
+https://github.com/spring-projects/spring-framework/issues/25547
+
+Logback AsyncAppender
 
 #### Async SOAP
 Based on [6] but with ApacheCXF instead
@@ -126,3 +125,5 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 [6] https://godatadriven.com/blog/reactive-web-service-client-with-jax-ws/
 
 [7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M&t=11s (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
+
+[8] https://www.baeldung.com/spring-webflux-concurrency
