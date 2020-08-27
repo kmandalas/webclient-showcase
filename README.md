@@ -24,10 +24,31 @@ Spring MVC controllers can call other reactive components too. A mix is also pos
 become reactive for a number of reasons such as: blocking dependencies with no reactive alternatives or we may have an existing legacy app 
 which we want to migrate gradually etc. In our case we will follow the [Annotated Controllers programming model](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-programming-models)
 
-## Project structure
+## Scenario / Project structure
 
-In order to demonstrate the usage of WebClient for service-to-service communication we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery.
-Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
+We will build a simplified One Time Password (OTP) service offering the following capabilities:
+
+* generate OTP
+* validate (use) OTP
+* resend OTP
+* get OTP status
+* OTP events status
+* Get all OTPs
+
+Our application will consist of the following microservices:
+
+* otp-service: which will provide the functionality above by orchestrating calls to local and remote services 
+* customer-service: will keep a catalogue of registered users to our service with information like: account id, MSISDN, e-mail etc.
+
+A number of remote (external) services will be invoked. We assume that our application is authorized to use them will access them via their REST API.
+Of course these will be mocked for simplicity. These "3rd-party" services are:
+
+* number-information: takes a phone number as input and verifies that it belongs to a Telecoms operator and is currently active
+* notification-service: delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
+
+In order to simulate a microservices setup, we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery and
+Spring Cloud Gateway. We will go with Spring Cloud Loadbalancer (instead of Ribbon) for client-side load balancing and with 
+@LoadBalanced WebClient (instead of Feign) for service-to-service communication. Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
 a PostgreSQL database using a reactive driver. A diagram of our components is shown below:
 
 [diagram]
