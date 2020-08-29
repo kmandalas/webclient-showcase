@@ -1,7 +1,7 @@
 CREATE TABLE otp (
     id              SERIAL CONSTRAINT id PRIMARY KEY,
-    customer_id     VARCHAR(255) NOT NULL,
-    value           INT NOT NULL,
-    created_on      TIMESTAMP NOT NULL,
+    pin             INT NOT NULL,
+    customer_id     BIGINT NOT NULL,
+    created_on      TIMESTAMPTZ NOT NULL,
     status          VARCHAR(255) NOT NULL
 );

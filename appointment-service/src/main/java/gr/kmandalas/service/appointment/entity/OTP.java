@@ -1,5 +1,6 @@
 package gr.kmandalas.service.appointment.entity;
 
+import gr.kmandalas.service.appointment.enumeration.OTPStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
-
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -23,15 +23,15 @@ public class OTP {
   private Long id;
 
   @Column("customer_id")
-  private String customerId;
+  private Long customerId;
 
-  @Column("value")
-  private Integer value;
+  @Column("pin")
+  private Integer pin;
 
   @Column("created_on")
-  private LocalDateTime createdOn;
+  private ZonedDateTime createdOn;
 
   @Column("status")
-  private String status;
+  private OTPStatus status;
 
 }
