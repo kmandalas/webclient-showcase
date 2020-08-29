@@ -1,31 +1,42 @@
 package gr.kmandalas.service.appointment.controller;
 
+import gr.kmandalas.service.appointment.dto.SendForm;
 import gr.kmandalas.service.appointment.entity.OTP;
 import gr.kmandalas.service.appointment.service.OTPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/otp")
+@RequestMapping("/v1/otp")
 @RequiredArgsConstructor
 public class OTPController {
 
   private final OTPService otpService;
 
   @GetMapping
-  public Mono<OTP> get(@RequestParam String customerId) {
-    return otpService.get(customerId);
+  public Flux<OTP> getAll(@RequestParam(required = false) Long customerId) {
+    return otpService.getAll(customerId);
+  }
+
+  @GetMapping("/{otpId}")
+  public Mono<OTP> get(@PathVariable Long otpId) {
+    return otpService.get(otpId);
   }
 
   @PostMapping
-  public Mono<OTP> generate(@RequestParam String customerId) {
-    return otpService.generate(customerId);
+  public Mono<OTP> send(@RequestBody SendForm form) {
+    return otpService.send(form);
   }
 
-  @PostMapping("/{providedOTP}")
-  public Mono<String> validate(@PathVariable Integer providedOTP,
-                               @RequestParam String customerId) {
-    return otpService.validate(providedOTP, customerId);
+  @PostMapping("/{otpId}")
+  public Mono<OTP> resend(@PathVariable Long otpId) {
+    return otpService.resend(otpId);
+  }
+
+  @PostMapping("/validate/{otpId}")
+  public Mono<String> validate(@PathVariable Long otpId, @RequestParam Integer pin) {
+    return otpService.validate(otpId, pin);
   }
 }
