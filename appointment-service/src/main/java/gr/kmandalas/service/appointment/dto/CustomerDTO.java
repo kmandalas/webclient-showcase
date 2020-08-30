@@ -1,4 +1,4 @@
-package gr.kmandalas.service.customer.dto;
+package gr.kmandalas.service.appointment.dto;
 
 import lombok.Builder;
 import lombok.Data;

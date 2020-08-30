@@ -19,7 +19,7 @@ public class CustomerService {
     public Mono<CustomerDTO> findByNumber(String number) {
         return customerRepository.findByNumber(number)
                 .map(customer -> CustomerDTO.builder()
-                        .accountId(customer.getId().toString())
+                        .accountId(customer.getId())
                         .email(customer.getEmail())
                         .firstName(customer.getFirstName())
                         .lastName(customer.getLastName())

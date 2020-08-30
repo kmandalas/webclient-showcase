@@ -1,0 +1,19 @@
+server:
+  port: 8005
+
+spring:
+  application:
+    name: notification-service
+  mvc:
+    log-request-details: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    gr.kmandalas: DEBUG
+    org.springframework.web: TRACE

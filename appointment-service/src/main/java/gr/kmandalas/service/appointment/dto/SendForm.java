@@ -4,7 +4,5 @@ import lombok.Data;
 
 @Data
 public class SendForm {
-
-  private Long customerId;
-
+  private String msisdn;
 }

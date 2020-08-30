@@ -38,6 +38,10 @@ services:
       - POSTGRES_DB=test
       - POSTGRES_USER=kmandalas
       - POSTGRES_PASSWORD=passepartout
+      - NOTIFICATION_SERVICE_HOST=notification-service
+      - NOTIFICATION_SERVICE_PORT=8005
+      - NUMBER-INFORMATION_SERVICE_HOST=number-information-service
+      - NUMBER-INFORMATION_SERVICE_PORT=8006
 
   customer-service:
     restart: on-failure
@@ -54,6 +58,24 @@ services:
       - POSTGRES_DB=test
       - POSTGRES_USER=kmandalas
       - POSTGRES_PASSWORD=passepartout
+
+  notification-service:
+    restart: on-failure
+    build: notification-service/.
+    image: webclient-showcase/notification-service:1
+    ports:
+      - "8005:8005"
+    networks:
+      - consul-net
+
+  number-information-service:
+    restart: on-failure
+    build: number-information-service/.
+    image: webclient-showcase/number-information-service:1
+    ports:
+      - "8006:8006"
+    networks:
+      - consul-net
 
   postgres:
     image: postgres:latest
