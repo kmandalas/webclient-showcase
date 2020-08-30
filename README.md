@@ -51,7 +51,7 @@ Spring Cloud Gateway. We will go with Spring Cloud Loadbalancer (instead of Ribb
 @LoadBalanced WebClient (instead of Feign) for service-to-service communication. Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
 a PostgreSQL database using a reactive driver. A diagram of our components is shown below:
 
-[diagram]
+![Image of Microservices](/diagrams/WebClientShowcase.png)
 
 We have Integration tests covering each microservice endpoint and we use [WireMock](http://wiremock.org) and [Testcontainers](https://www.testcontainers.org) for this purpose. 
 
