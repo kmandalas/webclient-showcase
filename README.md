@@ -37,14 +37,14 @@ We will build a simplified One Time Password (OTP) service offering the followin
 
 Our application will consist of the following microservices:
 
-* otp-service: which will provide the functionality above by orchestrating calls to local and remote services 
-* customer-service: will keep a catalogue of registered users to our service with information like: account id, MSISDN, e-mail etc.
+* **otp-service:** which will provide the functionality above by orchestrating calls to local and remote services 
+* **customer-service:** will keep a catalogue of registered users to our service with information like: account id, MSISDN, e-mail etc.
 
 A number of remote (external) services will be invoked. We assume that our application is authorized to use them will access them via their REST API.
 Of course these will be mocked for simplicity. These "3rd-party" services are:
 
-* number-information: takes a phone number as input and verifies that it belongs to a Telecoms operator and is currently active
-* notification-service: delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
+* **number-information:** takes a phone number as input and verifies that it belongs to a Telecoms operator and is currently active
+* **notification-service:** delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
 
 In order to simulate a microservices setup, we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery and
 Spring Cloud Gateway. We will go with Spring Cloud Loadbalancer (instead of Ribbon) for client-side load balancing and with 
@@ -55,24 +55,39 @@ a PostgreSQL database using a reactive driver. A diagram of our components is sh
 
 We have Integration tests covering each microservice endpoint and we use [WireMock](http://wiremock.org) and [Testcontainers](https://www.testcontainers.org) for this purpose. 
 
-### Use cases
+#### generate OTP
 
-- [ ] WebClient simple usage
-- [ ] Parallel calls to the same endpoint
-- [ ] Parallel calls to the different endpoint
-- [ ] .zip VS .zipWhen VS .zipDelayError VS .zipOnNext
-- [ ] doOnNext VS .doOnSuccess VS .doOnError
-- [ ] Chaining of calls (Sequential execution)
-- [ ] Service-to-service communication
-- [ ] Database interaction (r2dbc/postgresql)
+Business requirement
 
-#### Service-to-service communication
-We can leverage the WebClient for service-to-service communication as well instead of [Spring Cloud OpenFeign](https://spring.io/projects/spring-cloud-openfeign) or other methods. 
-We usually want to take advantage of client-side load balancing too and this is possible by applying the `@LoadBalanced` annotation.
+> Given the number of a user in [E.164](https://en.wikipedia.org/wiki/E.164) format: 
+> 1. fetch customer data from customer-service and in parallel validate the number status using the number-information service
+> 2. produce an OTP pin and save it in the DB
+> 3. invoke the notification-service to deliver it
+> 4. return response 
 
-However a couple of practical issues that you may face with real-world applications are:
-* the need for [Multiple WebClient Objects](https://cloud.spring.io/spring-cloud-commons/2.1.x/multi/multi__spring_cloud_commons_common_abstractions.html#_multiple_webclient_objects)
-* propagate a JWT token in case we have our various endpoints protected
+Solution
+ 
+First of all, we see that we need to communicate with 1 internal microservice (service-to-service communication) and with 2 external (remote) services.
+
+Here are a couple of practical issues that one may face with real-world applications:
+1. the need for [Multiple WebClient Objects](https://cloud.spring.io/spring-cloud-commons/2.1.x/multi/multi__spring_cloud_commons_common_abstractions.html#_multiple_webclient_objects)
+2. propagate a JWT token in case we have our various endpoints protected
+
+In order to deal with the 1st issue we will declare 2 different WebClient Beans inside our `WebClientConfig` class.
+This is necessary since service-discovery and load-balancing is only applicable to our own domain and services. 
+Therefore we need to use different instances of WebClient Beans which of course may have additional differences in configuration (e.g. timeouts)
+than the `@LoadBalanced` annotation.
+
+For the 2nd issue... TODO (explain with commented code)
+
+Now that we have these sorted out, let's see which Reactor Publisher functions we can use to get the result:
+
+* In order to make parallel calls to different endpoints we will use Mono's ***zip*** method
+* When these parallel calls complete in order to process the results, chain subsequent actions and return a response, we will use the ***flatMap*** method
+* Inside the transformer Function of the ***flatMap***, we generate a random PIN and we persist in in the DB using a `ReactiveCrudRepository`
+* We use the ***zipWhen*** method to trigger the notification-service only after the DB interaction has finished
+* Finally, we use ***map*** method in order to select our return value which in our case is the data object that was previously saved in the DB
+
 
 ### Other topics
 
@@ -127,3 +142,18 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 [7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M&t=11s (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
 
 [8] https://www.baeldung.com/spring-webflux-concurrency
+
+### TODO
+
+- [x] WebClient simple usage
+- [x] Parallel calls to the same endpoint
+- [x] Parallel calls to the different endpoint
+- [x] .zip
+- [x] .zipWhen
+- [ ] .zipDelayError
+- [ ] .zipOnNext
+- [ ] .doOnNext
+- [ ] .doOnSuccess VS .doOnError
+- [x] Chaining of calls (Sequential execution)
+- [x] Service-to-service communication
+- [x] Database interaction (r2dbc/postgresql)
