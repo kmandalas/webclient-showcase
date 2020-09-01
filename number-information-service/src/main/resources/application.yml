@@ -1,0 +1,19 @@
+server:
+  port: 8006
+
+spring:
+  application:
+    name: number-information-service
+  mvc:
+    log-request-details: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    gr.kmandalas: DEBUG
+    org.springframework.web: TRACE

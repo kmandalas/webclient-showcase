@@ -35,6 +35,8 @@
 		<module>appointment-service</module>
 		<module>customer-service</module>
 		<module>gateway-service</module>
+		<module>notification-service</module>
+		<module>number-information-service</module>
 	</modules>
 
 	<repositories>

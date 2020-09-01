@@ -34,3 +34,8 @@ logging:
   level:
     gr.kmandalas: DEBUG
     org.springframework.web: TRACE
+
+external:
+  services:
+    notifications: ${notification.service.host:localhost}:${notification.service.port:8005}/notifications
+    number-information: ${number-information.service.host:localhost}:${number-information.service.port:8005}/number-information
