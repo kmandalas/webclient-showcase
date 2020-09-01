@@ -23,10 +23,10 @@ services:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
 
-  appointment-service:
+  otp-service:
     restart: on-failure
-    build: appointment-service/.
-    image: webclient-showcase/appointment-service:1
+    build: otp-service/.
+    image: webclient-showcase/otp-service:1
     ports:
       - "8001:8001"
     networks:
