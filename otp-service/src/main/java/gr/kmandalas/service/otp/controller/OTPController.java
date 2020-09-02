@@ -37,7 +37,7 @@ public class OTPController {
     return otpService.resend(otpId, sms, viber);
   }
 
-  @PostMapping("/validate/{otpId}")
+  @PostMapping("/{otpId}/validate")
   public Mono<String> validate(@PathVariable Long otpId, @RequestParam Integer pin) {
     return otpService.validate(otpId, pin);
   }

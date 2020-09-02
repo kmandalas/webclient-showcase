@@ -137,19 +137,22 @@ public class OTPService {
   }
 
   /**
-   * Validate an OTP
+   * Validates an OTP and updates its status as {@link OTPStatus#USED} on success
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
   public Mono<String> validate(Long otpId, Integer pin) {
-      return get(otpId)
-          .map(currentOTP -> {
-            if (currentOTP.getPin().equals(pin)
-                && currentOTP.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(30))))
-              return "Valid!";
-            else
-              return "Invalid...";
-          });
+	  return otpRepository.findByIdAndPin(otpId, pin)
+			  .flatMap(otp -> {
+					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(30)))) {
+						  otp.setStatus(OTPStatus.USED);
+						  return otpRepository.save(otp);
+					  } else {
+						  return Mono.error(new RuntimeException("Expired"));
+					  }
+				  })
+			  .switchIfEmpty(Mono.error(new RuntimeException("Not found")))
+			  .thenReturn("OK");
   }
 
   private Mono<OTP> sendToMail(OTP otp) {
