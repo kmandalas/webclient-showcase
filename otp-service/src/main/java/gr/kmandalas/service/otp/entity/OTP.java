@@ -18,20 +18,26 @@ import java.time.ZonedDateTime;
 @Table("otp")
 public class OTP {
 
-  @Id
-  @Column("id")
-  private Long id;
+	@Id
+	@Column("id")
+	private Long id;
 
-  @Column("customer_id")
-  private Long customerId;
+	@Column("customer_id")
+	private Long customerId;
 
-  @Column("pin")
-  private Integer pin;
+	@Column("pin")
+	private Integer pin;
 
-  @Column("created_on")
-  private ZonedDateTime createdOn;
+	@Column("application_id")
+	private Integer applicationId;
 
-  @Column("status")
-  private OTPStatus status;
+	@Column("attempt_count")
+	private Integer attemptCount;
+
+	@Column("created_on")
+	private ZonedDateTime createdOn;
+
+	@Column("status")
+	private OTPStatus status;
 
 }

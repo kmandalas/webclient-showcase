@@ -16,10 +16,10 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: appointment-service
-          uri: lb://appointment-service
+        - id: otp-service
+          uri: lb://otp-service
           predicates:
-            - Path=/appointment-service/**
+            - Path=/otp-service/**
           filters:
             - StripPrefix=1
         - id: customer-service
