@@ -144,14 +144,14 @@ public class OTPService {
   public Mono<String> validate(Long otpId, Integer pin) {
 	  return otpRepository.findByIdAndPinAndStatus(otpId, pin, OTPStatus.ACTIVE)
 			  .flatMap(otp -> {
-					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(30)))) {
+					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(120)))) { // TODO: this is incorrect
 						  otp.setStatus(OTPStatus.VERIFIED);
 					  } else {
 						  otp.setStatus(OTPStatus.EXPIRED);
 					  }
 					  otp.setAttemptCount(otp.getAttemptCount() + 1);
 					  Mono<OTP> saved = otpRepository.save(otp);
-					  if (otp.getStatus().equals(OTPStatus.ACTIVE))
+					  if (otp.getStatus().equals(OTPStatus.VERIFIED))
 					  	return saved;
 					  else return Mono.error(new RuntimeException("Expired"));
 				  })
