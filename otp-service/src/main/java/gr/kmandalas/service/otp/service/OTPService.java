@@ -106,6 +106,8 @@ public class OTPService {
                               .pin(pin)
                               .createdOn(ZonedDateTime.now())
                               .status(OTPStatus.ACTIVE)
+							  .applicationId(1)
+							  .attemptCount(0)
                               .build())
                       // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel
                       // The results are combined in a single Mono
@@ -144,7 +146,7 @@ public class OTPService {
   public Mono<String> validate(Long otpId, Integer pin) {
 	  return otpRepository.findByIdAndPinAndStatus(otpId, pin, OTPStatus.ACTIVE)
 			  .flatMap(otp -> {
-					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(120)))) { // TODO: this is incorrect
+					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(120)))) {
 						  otp.setStatus(OTPStatus.VERIFIED);
 					  } else {
 						  otp.setStatus(OTPStatus.EXPIRED);
