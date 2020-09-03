@@ -105,7 +105,7 @@ public class OTPService {
                               .customerId(resultTuple.getT1().getAccountId())
                               .pin(pin)
                               .createdOn(ZonedDateTime.now())
-                              .status(OTPStatus.UNUSED)
+                              .status(OTPStatus.ACTIVE)
                               .build())
                       // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel
                       // The results are combined in a single Mono
@@ -137,22 +137,26 @@ public class OTPService {
   }
 
   /**
-   * Validates an OTP and updates its status as {@link OTPStatus#USED} on success
+   * Validates an OTP and updates its status as {@link OTPStatus#ACTIVE} on success
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
   public Mono<String> validate(Long otpId, Integer pin) {
-	  return otpRepository.findByIdAndPin(otpId, pin)
+	  return otpRepository.findByIdAndPinAndStatus(otpId, pin, OTPStatus.ACTIVE)
 			  .flatMap(otp -> {
 					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(30)))) {
-						  otp.setStatus(OTPStatus.USED);
-						  return otpRepository.save(otp);
+						  otp.setStatus(OTPStatus.VERIFIED);
 					  } else {
-						  return Mono.error(new RuntimeException("Expired"));
+						  otp.setStatus(OTPStatus.EXPIRED);
 					  }
+					  otp.setAttemptCount(otp.getAttemptCount() + 1);
+					  Mono<OTP> saved = otpRepository.save(otp);
+					  if (otp.getStatus().equals(OTPStatus.ACTIVE))
+					  	return saved;
+					  else return Mono.error(new RuntimeException("Expired"));
 				  })
 			  .switchIfEmpty(Mono.error(new RuntimeException("Not found")))
-			  .thenReturn("OK");
+			  .thenReturn("OK"); // or .doOnSuccess
   }
 
   private Mono<OTP> sendToMail(OTP otp) {
