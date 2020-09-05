@@ -101,6 +101,12 @@ Logback AsyncAppender
 #### Async SOAP
 Based on [6] but with ApacheCXF instead
 
+#### Reactive types support for @Cacheable methods
+
+* https://jira.spring.io/browse/DATAREDIS-967
+* https://github.com/spring-projects/spring-framework/issues/17920
+
+
 ### How to run
 
 #### Integration tests
