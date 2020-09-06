@@ -34,3 +34,4 @@ logging:
   level:
     gr.kmandalas: DEBUG
     org.springframework.web: TRACE
+    org.springframework.data.r2dbc: TRACE

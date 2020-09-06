@@ -8,6 +8,7 @@ import gr.kmandalas.service.otp.entity.OTP;
 import gr.kmandalas.service.otp.enumeration.OTPStatus;
 import gr.kmandalas.service.otp.repository.OTPRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -28,6 +29,7 @@ import static org.springframework.data.mapping.Alias.ofNullable;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OTPService {
 
   private final OTPRepository otpRepository;
@@ -91,9 +93,13 @@ public class OTPService {
             webclient.build()
                     .get()
                     .uri(numberInfoURI)
-                    .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(String.class))
+            .map(resultTuple -> {
+                log.info(resultTuple.getT2());
+                log.info(resultTuple.toString());
+                return resultTuple;
+            })
             .flatMap(resultTuple -> {
 
               // After the calls have completed, generate a random pin

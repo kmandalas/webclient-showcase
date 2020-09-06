@@ -1,6 +1,8 @@
 package gr.kmandalas.service.customer.service;
 
 import gr.kmandalas.service.customer.dto.CustomerDTO;
+import gr.kmandalas.service.customer.entity.Customer;
+import gr.kmandalas.service.customer.exception.CustomerNotFoundException;
 import gr.kmandalas.service.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class CustomerService {
      */
     public Mono<CustomerDTO> findByNumber(String number) {
         return customerRepository.findByNumber(number)
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException("Customer with number: " + number + "not found")))
                 .map(customer -> CustomerDTO.builder()
                         .accountId(customer.getId())
                         .email(customer.getEmail())
