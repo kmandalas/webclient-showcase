@@ -5,6 +5,7 @@ import gr.kmandalas.service.otp.dto.NotificationRequestForm;
 import gr.kmandalas.service.otp.dto.NotificationResultDTO;
 import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.entity.OTP;
+import gr.kmandalas.service.otp.enumeration.Channel;
 import gr.kmandalas.service.otp.enumeration.OTPStatus;
 import gr.kmandalas.service.otp.repository.OTPRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,9 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mapping.Alias.ofNullable;
 
@@ -111,35 +114,51 @@ public class OTPService {
                               .build())
                       // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel
                       // The results are combined in a single Mono
-                      .zipWhen(otp -> webclient.build()
-                              .post()
-                              .uri(notificationServiceUrl)
-                              .accept(MediaType.APPLICATION_JSON)
-                              .body(BodyInserters.fromValue(NotificationRequestForm.builder()
-                                      .channel("SMS")
-                                      .msisdn(form.getMsisdn())
-                                      .message(String.valueOf(pin))
-                                      .build()))
-                              .retrieve()
-                              .bodyToMono(NotificationResultDTO.class))
+                      .zipWhen(otp -> notify(NotificationRequestForm.builder()
+							  .channel(Channel.AUTO.name())
+							  .msisdn(form.getMsisdn())
+							  .message(String.valueOf(pin))
+							  .build()))
                       // Return only the result of the first call (DB)
                       .map(Tuple2::getT1);
-
             });
   }
 
   /**
    * Resend an already generated OTP
+   *
    * @param otpId the OTP id
    */
-  public Mono<OTP> resend(Long otpId, Boolean sms, Boolean viber) {
-    return get(otpId)
-            //call
-        .flatMap(this::sendToMail);
+  public Mono<OTP> resend(Long otpId, String channel) {
+
+	  //Mono<NotificationResultDTO> notifyStandard = notify("SMS", "", "");
+	  //Mono<NotificationResultDTO> notifyExtra = notify("E-MAIL", "", "OTP was sent on your contact phone");
+	  //Flux.merge(notifyStandard, notifyExtra);
+
+	  List<NotificationRequestForm> notifications = List.of(NotificationRequestForm.builder()
+			  .channel("SMS")
+			  .msisdn("")
+			  .message("")
+			  .build(),
+	  NotificationRequestForm.builder()
+			  .channel("E-MAIL")
+			  .msisdn("")
+			  .message("OTP was sent on your contact phone")
+			  .build());
+
+	  return otpRepository.findByIdAndStatus(otpId, OTPStatus.ACTIVE)
+    	.zipWhen(otp ->
+				Flux.merge(notifications.stream()
+						.map(this::notify)
+						.collect(Collectors.toUnmodifiableList()))
+						.count())
+			  .map(Tuple2::getT1)
+		.switchIfEmpty(Mono.error(new RuntimeException("Not found")));
   }
 
   /**
    * Validates an OTP and updates its status as {@link OTPStatus#ACTIVE} on success
+   *
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
@@ -161,11 +180,14 @@ public class OTPService {
 			  .thenReturn("OK"); // or .doOnSuccess
   }
 
-  private Mono<OTP> sendToMail(OTP otp) {
-    // call notification-ms
-
-//    return Mono.error(new RuntimeException("send failed"));
-    return Mono.just(otp);
+  private Mono<NotificationResultDTO> notify(NotificationRequestForm data) {
+	return webclient.build()
+			.post()
+			.uri(notificationServiceUrl)
+			.accept(MediaType.APPLICATION_JSON)
+			.body(BodyInserters.fromValue(data))
+			.retrieve()
+			.bodyToMono(NotificationResultDTO.class);
   }
 
 }
