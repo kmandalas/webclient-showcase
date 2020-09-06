@@ -1,6 +1,7 @@
 package gr.kmandalas.service.customer.controller;
 
 import gr.kmandalas.service.customer.dto.CustomerDTO;
+import gr.kmandalas.service.customer.dto.CustomerForm;
 import gr.kmandalas.service.customer.exception.CustomerNotFoundException;
 import gr.kmandalas.service.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,12 @@ public class CustomerController {
         return customerService.findByNumber(number).map(ResponseEntity::ok);
     }
 
-    @ExceptionHandler
+    @PostMapping
+    public Mono<ResponseEntity<CustomerDTO>> createCustomer(@RequestBody CustomerForm customerForm) {
+        return customerService.insertCustomer(customerForm).map(ResponseEntity::ok);
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
     public ResponseEntity<Void> handleCustomerNotFoundException(CustomerNotFoundException ex){
         log.warn("Customer not found: ", ex);
         return ResponseEntity.notFound().build();
