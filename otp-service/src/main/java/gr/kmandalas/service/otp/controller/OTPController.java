@@ -4,6 +4,7 @@ import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.entity.OTP;
 import gr.kmandalas.service.otp.service.OTPService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,4 +40,5 @@ public class OTPController {
   public Mono<String> validate(@PathVariable Long otpId, @RequestParam Integer pin) {
     return otpService.validate(otpId, pin);
   }
+
 }

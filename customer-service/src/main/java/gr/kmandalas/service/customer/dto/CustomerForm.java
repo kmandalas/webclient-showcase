@@ -1,4 +1,4 @@
-package gr.kmandalas.service.otp.dto;
+package gr.kmandalas.service.customer.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerDTO {
-
+public class CustomerForm {
     private String firstName;
     private String lastName;
-    private Long accountId;
     private String email;
-
+    private String number;
 }

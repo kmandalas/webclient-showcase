@@ -24,4 +24,5 @@ public class FlywayConfiguration {
 						env.getRequiredProperty("spring.flyway.password"))
 		);
 	}
+
 }
