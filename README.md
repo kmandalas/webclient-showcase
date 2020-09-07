@@ -106,6 +106,10 @@ Based on [6] but with ApacheCXF instead
 * https://jira.spring.io/browse/DATAREDIS-967
 * https://github.com/spring-projects/spring-framework/issues/17920
 
+#### Long response time
+
+
+
 
 ### How to run
 
@@ -148,6 +152,8 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 [7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M&t=11s (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
 
 [8] https://www.baeldung.com/spring-webflux-concurrency
+
+[9] https://piotrminkowski.com/2020/03/30/a-deep-dive-into-spring-webflux-threading-model/
 
 ### TODO
 

@@ -159,6 +159,7 @@ public class OTPService {
 
   /**
    * Validates an OTP and updates its status as {@link OTPStatus#ACTIVE} on success
+   *
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
