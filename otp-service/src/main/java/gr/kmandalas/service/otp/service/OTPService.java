@@ -5,6 +5,7 @@ import gr.kmandalas.service.otp.dto.NotificationRequestForm;
 import gr.kmandalas.service.otp.dto.NotificationResultDTO;
 import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.entity.OTP;
+import gr.kmandalas.service.otp.enumeration.Channel;
 import gr.kmandalas.service.otp.enumeration.OTPStatus;
 import gr.kmandalas.service.otp.exception.OTPException;
 import gr.kmandalas.service.otp.repository.OTPRepository;
@@ -104,12 +105,12 @@ public class OTPService {
                 return clientResponse.bodyToMono(String.class);
             });
 
-    // Combine the results in a single Mono, than completes when both calls have returned
-    // If an error occurs in one of the monos, execution stops immediately.
-    // If we want to delay errors and execute all monos, then we can use zipDelayError instead
+    // Combine the results in a single Mono, that completes when both calls have returned.
+    // If an error occurs in one of the Monos, execution stops immediately.
+    // If we want to delay errors and execute all Monos, then we can use zipDelayError instead
     Mono<Tuple2<CustomerDTO, String>> zippedCalls = Mono.zip(customerInfo, msisdnStatus);
 
-    //Perform additional actions after the combined mono has returned
+    // Perform additional actions after the combined mono has returned
     return zippedCalls.flatMap(resultTuple -> {
 
         // After the calls have completed, generate a random pin
@@ -131,30 +132,28 @@ public class OTPService {
                 .uri(notificationServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(NotificationRequestForm.builder()
-                        .channel("SMS")
+                        .channel(Channel.AUTO.name())
                         .msisdn(form.getMsisdn())
                         .message(String.valueOf(pin))
                         .build()))
                 .retrieve()
                 .bodyToMono(NotificationResultDTO.class);
 
-        // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel
-        // The results are combined in a single Mono
+        // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel.
+        // The results are combined in a single Mono:
         return otpMono.zipWhen(otp -> notificationResultDTOMono)
                 // Return only the result of the first call (DB)
                 .map(Tuple2::getT1);
-
     });
   }
 
   /**
    * Resend an already generated OTP
+   *
    * @param otpId the OTP id
    */
-  public Mono<OTP> resend(Long otpId, Boolean sms, Boolean viber) {
-    return get(otpId)
-            //call
-        .flatMap(this::sendToMail);
+  public Mono<OTP> resend(Long otpId, String channel) {
+    return Mono.error(UnsupportedOperationException::new); // TODO
   }
 
   /**
@@ -179,13 +178,6 @@ public class OTPService {
 				  })
 			  .switchIfEmpty(Mono.error(new RuntimeException("Not found")))
 			  .thenReturn("OK"); // or .doOnSuccess
-  }
-
-  private Mono<OTP> sendToMail(OTP otp) {
-    // call notification-ms
-
-//    return Mono.error(new RuntimeException("send failed"));
-    return Mono.just(otp);
   }
 
 }

@@ -12,4 +12,5 @@ public class OTPControllerAdvice {
     public ResponseEntity<String> handleOTPException(OTPException ex){
         return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
     }
+
 }

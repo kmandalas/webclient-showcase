@@ -10,8 +10,10 @@ import javax.validation.constraints.NotEmpty;
 @ToString
 @Builder
 public class NotificationRequestForm {
+
     @NotEmpty
     private String channel;
     private String msisdn;
     private String message;
+
 }
