@@ -29,7 +29,7 @@ public class NotificationController {
                     .badRequest()
                     .body(NotificationResultDTO.builder()
                             .status("ERROR")
-                            .message("Channel must be EMAIL or PHONE")
+                            .message("Unsupported communication channel")
                             .build());
         }
     }
