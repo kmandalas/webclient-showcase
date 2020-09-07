@@ -1,0 +1,48 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: otp-service
+  mvc:
+    log-request-details: true
+  cloud:
+    discovery:
+      enabled: false
+    consul:
+      discovery:
+        enabled: false
+      enabled: false
+    loadbalancer:
+      ribbon:
+        enabled: false
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  #    schemas: demo
+  #    locations: db/migration
+  r2dbc:
+    url: ${DB_URL_R2DBC}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    gr.kmandalas: DEBUG
+    org.springframework.web: TRACE
+
+external:
+  services:
+    notifications: http://${notification.service.host:localhost}:${notification.service.port:8005}/notifications
+    number-information: http://${number-information.service.host:localhost}:${number-information.service.port:8006}/number-information
