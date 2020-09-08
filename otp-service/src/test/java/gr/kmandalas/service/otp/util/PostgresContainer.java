@@ -35,4 +35,5 @@ public class PostgresContainer extends PostgreSQLContainer<PostgresContainer> {
 	private String getR2dbcUrl() {
 		return String.format("r2dbc:postgresql://%s:%d/%s?loggerLevel=OFF", this.getHost(), this.getMappedPort(POSTGRESQL_PORT), this.getDatabaseName());
 	}
+
 }

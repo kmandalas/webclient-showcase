@@ -1,0 +1,16 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: otp-service-test
+  cloud:
+    discovery:
+      enabled: false
+    consul:
+      discovery:
+        enabled: false
+      enabled: false
+    loadbalancer:
+      ribbon:
+        enabled: false
