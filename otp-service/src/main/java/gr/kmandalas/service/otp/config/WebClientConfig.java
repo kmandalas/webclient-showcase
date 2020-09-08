@@ -1,6 +1,7 @@
 package gr.kmandalas.service.otp.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.consul.ConditionalOnConsulEnabled;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -10,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 
 @Configuration
+@ConditionalOnConsulEnabled
 public class WebClientConfig {
 
     @Bean

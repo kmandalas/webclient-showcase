@@ -32,7 +32,7 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 @ContextConfiguration(initializers = { OTPControllerIntegrationTests.PostgresContainerInitializer.class })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class OTPControllerIntegrationTests extends BaseControllerIT {
+public class OTPControllerIntegrationTests {
 
 	@Autowired
 	private WebTestClient webTestClient;
@@ -50,7 +50,7 @@ public class OTPControllerIntegrationTests extends BaseControllerIT {
 
 	@BeforeEach
 	void setUp() {
-		var simulation = dsl(service("http://customer-service/").get("customers?number=1234567891")
+		var simulation = dsl(service("http://customer-service").get("customers?number=1234567891")
 						.willReturn(success()
 								.body(json(CustomerDTO.builder()
 										.firstName("John")
