@@ -28,6 +28,8 @@ import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
 import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 import static io.specto.hoverfly.junit.dsl.HttpBodyConverter.*;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
+import static io.specto.hoverfly.junit.dsl.matchers.HoverflyMatchers.any;
+import static io.specto.hoverfly.junit.dsl.matchers.HoverflyMatchers.matches;
 
 @ContextConfiguration(initializers = { OTPControllerIntegrationTests.PostgresContainerInitializer.class })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -50,7 +52,8 @@ public class OTPControllerIntegrationTests {
 
 	@BeforeEach
 	void setUp() {
-		var simulation = dsl(service("http://customer-service").get("customers?number=1234567891")
+		var simulation = dsl(service("http://customer-service")
+						.get("/customers").queryParam("number", any())
 						.willReturn(success()
 								.body(json(CustomerDTO.builder()
 										.firstName("John")
@@ -70,7 +73,7 @@ public class OTPControllerIntegrationTests {
 										.message("A message")
 										.build()))));
 
-		var localConfig = HoverflyConfig.localConfigs().disableTlsVerification().proxyLocalHost().proxyPort(7999);
+		var localConfig = HoverflyConfig.localConfigs().disableTlsVerification().asWebServer().proxyPort(7999);
 		hoverfly = new Hoverfly(localConfig, SIMULATE);
 		hoverfly.start();
 		hoverfly.simulate(simulation);
