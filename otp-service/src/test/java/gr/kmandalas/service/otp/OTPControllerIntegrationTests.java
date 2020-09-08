@@ -50,7 +50,7 @@ public class OTPControllerIntegrationTests extends BaseControllerIT {
 
 	@BeforeEach
 	void setUp() {
-		var simulation = dsl(service("customer-service").get("customers?number=1234567891")
+		var simulation = dsl(service("http://customer-service/").get("customers?number=1234567891")
 						.willReturn(success()
 								.body(json(CustomerDTO.builder()
 										.firstName("John")
