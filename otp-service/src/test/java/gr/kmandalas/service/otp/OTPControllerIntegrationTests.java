@@ -6,7 +6,6 @@ import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.util.PostgresContainer;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.core.HoverflyConfig;
-import io.specto.hoverfly.junit.rule.HoverflyRule;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.ClassRule;
@@ -82,31 +81,32 @@ public class OTPControllerIntegrationTests extends BaseControllerIT {
 		hoverfly.close();
 	}
 
-	@ClassRule
-	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(
-			dsl(service("customer-service").get("customers?number=1234567891")
-					.willReturn(success()
-							.body(json(CustomerDTO.builder()
-									.firstName("John")
-									.lastName("Papadopoulos")
-									.accountId(Long.MIN_VALUE)
-									.email("john.papadopoulos@mail.com")
-									.build()))),
-					service("http://localhost:8006")
-							.get("/number-information")
-							.willReturn(success()
-									.body("Valid")),
-					service("http://localhost:8005")
-							.get("/notifications")
-							.willReturn(success()
-									.body(json(NotificationResultDTO.builder()
-											.status("OK")
-											.message("A message")
-											.build())))),
-			HoverflyConfig.localConfigs().proxyLocalHost().proxyPort(7999)).printSimulationData();
+	//@ClassRule
+	//public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(
+	//		dsl(service("customer-service").get("customers?number=1234567891")
+	//				.willReturn(success()
+	//						.body(json(CustomerDTO.builder()
+	//								.firstName("John")
+	//								.lastName("Papadopoulos")
+	//								.accountId(Long.MIN_VALUE)
+	//								.email("john.papadopoulos@mail.com")
+	//								.build()))),
+	//				service("http://localhost:8006")
+	//						.get("/number-information")
+	//						.willReturn(success()
+	//								.body("Valid")),
+	//				service("http://localhost:8005")
+	//						.get("/notifications")
+	//						.willReturn(success()
+	//								.body(json(NotificationResultDTO.builder()
+	//										.status("OK")
+	//										.message("A message")
+	//										.build())))),
+	//		HoverflyConfig.localConfigs().proxyLocalHost().proxyPort(7999)).printSimulationData();
 
 	@Test
-	void contextLoads(){}
+	void contextLoads() {
+	}
 
 	@Test
 	void testSend_success() throws Exception {
@@ -119,7 +119,6 @@ public class OTPControllerIntegrationTests extends BaseControllerIT {
 				.exchange()
 				.expectStatus()
 				.is2xxSuccessful();
-
 	}
 
 }
