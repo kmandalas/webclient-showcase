@@ -40,6 +40,7 @@ import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
 import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 import static io.specto.hoverfly.junit.dsl.HttpBodyConverter.*;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
+import static io.specto.hoverfly.junit.dsl.matchers.HoverflyMatchers.matches;
 
 @ContextConfiguration(initializers = { OTPControllerIntegrationTests.PostgresContainerInitializer.class })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -62,7 +63,9 @@ public class OTPControllerIntegrationTests {
 
 	@BeforeEach
 	void setUp() {
-		var simulation = dsl(service("http://customer-service")
+		var simulation = dsl(
+				// mock customer service
+				service("http://customer-service")
 						.get("/customers").anyQueryParams()
 						.willReturn(success()
 								.body(json(CustomerDTO.builder()
@@ -71,18 +74,21 @@ public class OTPControllerIntegrationTests {
 										.accountId(Long.MIN_VALUE)
 										.email("john.papadopoulos@mail.com")
 										.build()))),
-				service("http://localhost:8999")
+				// mock number-information service
+				service(matches("number-information"))
 						.get("/number-information")
 						.anyQueryParams()
 						.willReturn(success()
 								.body("Valid")),
-				service("http://localhost:8999")
+				// mock notifications service
+				service(matches("notifications"))
 						.post("/notifications").anyBody()
 						.willReturn(success()
 								.body(json(NotificationResultDTO.builder()
 										.status("OK")
 										.message("A message")
-										.build()))));
+										.build())))
+		);
 
 		var localConfig = HoverflyConfig.localConfigs().disableTlsVerification().asWebServer().proxyPort(8999);
 		hoverfly = new Hoverfly(localConfig, SIMULATE);
