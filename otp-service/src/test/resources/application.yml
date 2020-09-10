@@ -11,5 +11,5 @@ spring:
 
 external:
   services:
-    notifications: http://localhost:8005/notifications
-    number-information: http://localhost:8006/number-information
+    notifications: http://localhost:8999/notifications
+    number-information: http://localhost:8999/number-information

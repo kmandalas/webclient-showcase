@@ -5,8 +5,8 @@ spring:
   application:
     name: otp-service-test
   cloud:
-    discovery:
-      enabled: false
+#    discovery:
+#      enabled: false
     consul:
       discovery:
         enabled: false
