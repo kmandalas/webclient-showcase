@@ -183,7 +183,7 @@ public class OTPService {
 					 faultReason.set(FaultReason.TOO_MANY_ATTEMPTS);
 				  } else if (!otp.getPin().equals(pin) ) {
 					  faultReason.set(FaultReason.INVALID_PIN);
-				  } else if (!otp.getStatus().equals(OTPStatus.ACTIVE)) {
+				  } else if (!otp.getStatus().equals(OTPStatus.ACTIVE)) { // todo: or VERIFIED
 					  faultReason.set(FaultReason.INVALID_STATUS);
 				  } else if (otp.getExpires().isBefore(ZonedDateTime.now())) {
 					  otp.setStatus(OTPStatus.EXPIRED);
