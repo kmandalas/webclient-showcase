@@ -195,9 +195,8 @@ public class OTPService {
 			  	  if (!otp.getStatus().equals(OTPStatus.TOO_MANY_ATTEMPTS))
 				  	otp.setAttemptCount(otp.getAttemptCount() + 1);
 
-			  	  Mono<OTP> otpMono = otpRepository.save(otp);
 				  if (otp.getStatus().equals(OTPStatus.VERIFIED))
-					  return otpMono;
+					  return otpRepository.save(otp);
 				  else {
 					  return Mono.error(new OTPException("Error validating OTP", faultReason.get(), otp));
 				  }
