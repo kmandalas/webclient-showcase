@@ -201,10 +201,14 @@ public class OTPService {
 					  return Mono.error(new OTPException("Error validating OTP", faultReason.get(), otp));
 				  }
 			  })
-			  .doOnError(throwable ->
-					  otpRepository.save(((OTPException)throwable).getOtp())
-							  .subscribe()
-			  );
+			  .doOnError(throwable -> {
+			  	if (throwable instanceof OTPException) {
+			  		OTPException error = ((OTPException) throwable);
+			  		if (!error.getFaultReason().equals(FaultReason.NOT_FOUND) && error.getOtp() != null) {
+			  			otpRepository.save(error.getOtp()).subscribe();
+			  		}
+			  	}
+			  });
   }
 
 }
