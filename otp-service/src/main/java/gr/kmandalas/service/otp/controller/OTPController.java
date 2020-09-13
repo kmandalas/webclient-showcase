@@ -31,8 +31,8 @@ public class OTPController {
   }
 
   @PostMapping("/{otpId}")
-  public Mono<OTP> resend(@PathVariable Long otpId, @RequestParam(required = false) String via) {
-    return otpService.resend(otpId, via);
+  public Mono<OTP> resend(@PathVariable Long otpId, @RequestParam(required = false) String via, @RequestParam(required = false) String mail) {
+    return otpService.resend(otpId, via, mail);
   }
 
   @PostMapping("/{otpId}/validate")

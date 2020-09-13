@@ -153,11 +153,11 @@ public class OTPService {
   }
 
   /**
-   * Resend an already generated OTP
+   * Resend an already generated OTP. If a mail is given then send additional notification with parallel call.
    *
    * @param otpId the OTP id
    */
-  public Mono<OTP> resend(Long otpId, String channel) {
+  public Mono<OTP> resend(Long otpId, String channel, String mail) {
     return Mono.error(UnsupportedOperationException::new); // TODO
   }
 
