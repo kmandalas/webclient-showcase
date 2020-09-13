@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerForm {
+
     private String firstName;
     private String lastName;
     private String email;
     private String number;
+
 }

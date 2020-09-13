@@ -7,5 +7,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface CustomerRepository extends ReactiveCrudRepository<Customer, Long> {
+
     Mono<Customer> findByNumber(String number);
+
 }

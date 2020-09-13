@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
+
     @Id
     private Long id;
     private String number;
@@ -18,4 +19,5 @@ public class Customer {
     private String lastName;
     private String email;
     private LocalDateTime createdAt;
+
 }

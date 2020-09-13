@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
+
     private final CustomerRepository customerRepository;
 
     /**
@@ -23,7 +24,7 @@ public class CustomerService {
      */
     public Mono<CustomerDTO> findByNumber(String number) {
         return customerRepository.findByNumber(number)
-                .switchIfEmpty(Mono.error(new CustomerNotFoundException("Customer with number: " + number + "not found")))
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException("Customer with number: " + number + " not found")))
                 .map(customer -> CustomerDTO.builder()
                         .accountId(customer.getId())
                         .email(customer.getEmail())
@@ -53,4 +54,5 @@ public class CustomerService {
                         .accountId(customer.getId())
                         .build());
     }
+
 }

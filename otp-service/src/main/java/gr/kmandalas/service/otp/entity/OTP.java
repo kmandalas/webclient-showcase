@@ -29,13 +29,16 @@ public class OTP {
 	private Integer pin;
 
 	@Column("application_id")
-	private Integer applicationId;
+	private String applicationId;
 
 	@Column("attempt_count")
 	private Integer attemptCount;
 
 	@Column("created_on")
 	private ZonedDateTime createdOn;
+
+	@Column("expires")
+	private ZonedDateTime expires;
 
 	@Column("status")
 	private OTPStatus status;
