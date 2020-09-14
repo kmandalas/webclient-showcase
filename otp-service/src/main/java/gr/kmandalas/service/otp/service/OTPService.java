@@ -6,8 +6,10 @@ import gr.kmandalas.service.otp.dto.NotificationResultDTO;
 import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.entity.OTP;
 import gr.kmandalas.service.otp.enumeration.Channel;
+import gr.kmandalas.service.otp.enumeration.FaultReason;
 import gr.kmandalas.service.otp.enumeration.OTPStatus;
 import gr.kmandalas.service.otp.exception.OTPException;
+import gr.kmandalas.service.otp.repository.ApplicationRepository;
 import gr.kmandalas.service.otp.repository.OTPRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,6 +29,7 @@ import reactor.util.function.Tuple2;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.data.mapping.Alias.ofNullable;
 
@@ -37,6 +39,8 @@ import static org.springframework.data.mapping.Alias.ofNullable;
 public class OTPService {
 
   private final OTPRepository otpRepository;
+
+  private final ApplicationRepository applicationRepository;
 
   @Autowired
   @LoadBalanced
@@ -66,7 +70,7 @@ public class OTPService {
    */
   public Mono<OTP> get(Long otpId) {
     return otpRepository.findById(otpId)
-        .switchIfEmpty(Mono.error(new OTPException(HttpStatus.NOT_FOUND, "OTP not found")));
+        .switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
   }
 
   /**
@@ -91,7 +95,7 @@ public class OTPService {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .onStatus(HttpStatus::is4xxClientError,
-                    clientResponse -> Mono.error(new OTPException(HttpStatus.BAD_REQUEST, "Error retrieving Customer")))
+                    clientResponse -> Mono.error(new OTPException("Error retrieving Customer", FaultReason.CUSTOMER_ERROR)))
             .bodyToMono(CustomerDTO.class);
 
     // 2nd call to external service, to check that the MSISDN is valid
@@ -101,7 +105,7 @@ public class OTPService {
             .exchange()
             .flatMap(clientResponse -> {
                 if (!clientResponse.statusCode().is2xxSuccessful())
-                    return Mono.error(new OTPException(HttpStatus.BAD_REQUEST, "Error retrieving msisdn info"));
+                    return Mono.error(new OTPException("Error retrieving msisdn status", FaultReason.NUMBER_INFORMATION_ERROR));
                 return clientResponse.bodyToMono(String.class);
             });
 
@@ -121,8 +125,9 @@ public class OTPService {
                         .customerId(resultTuple.getT1().getAccountId())
                         .pin(pin)
                         .createdOn(ZonedDateTime.now())
+						.expires(ZonedDateTime.now().plus(Duration.ofMinutes(1)))
                         .status(OTPStatus.ACTIVE)
-                        .applicationId(1)
+                        .applicationId("PPR")
                         .attemptCount(0)
                         .build());
 
@@ -148,11 +153,11 @@ public class OTPService {
   }
 
   /**
-   * Resend an already generated OTP
+   * Resend an already generated OTP. If a mail is given then send additional notification with parallel call.
    *
    * @param otpId the OTP id
    */
-  public Mono<OTP> resend(Long otpId, String channel) {
+  public Mono<OTP> resend(Long otpId, String channel, String mail) {
     return Mono.error(UnsupportedOperationException::new); // TODO
   }
 
@@ -162,22 +167,48 @@ public class OTPService {
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
-  public Mono<String> validate(Long otpId, Integer pin) {
-	  return otpRepository.findByIdAndPinAndStatus(otpId, pin, OTPStatus.ACTIVE)
-			  .flatMap(otp -> {
-					  if (otp.getCreatedOn().isAfter(ZonedDateTime.now().minus(Duration.ofSeconds(120)))) {
-						  otp.setStatus(OTPStatus.VERIFIED);
-					  } else {
-						  otp.setStatus(OTPStatus.EXPIRED);
-					  }
-					  otp.setAttemptCount(otp.getAttemptCount() + 1);
-					  Mono<OTP> saved = otpRepository.save(otp);
-					  if (otp.getStatus().equals(OTPStatus.VERIFIED))
-					  	return saved;
-					  else return Mono.error(new RuntimeException("Expired"));
-				  })
-			  .switchIfEmpty(Mono.error(new RuntimeException("Not found")))
-			  .thenReturn("OK"); // or .doOnSuccess
+  public Mono<OTP> validate(Long otpId, Integer pin) {
+  	  AtomicReference<FaultReason> faultReason = new AtomicReference<>();
+
+	  return otpRepository.findById(otpId)
+			  .switchIfEmpty(Mono.error(new OTPException("Error validating OTP", FaultReason.NOT_FOUND)))
+			  .zipWhen(otp -> applicationRepository.findById(otp.getApplicationId()))
+			  .flatMap(Tuple2 -> {
+			  	  var otp = Tuple2.getT1();
+			  	  var app = Tuple2.getT2();
+
+				  // FaultReason faultReason = null;
+			  	  if (otp.getAttemptCount() > app.getAttemptsAllowed()) {
+					 otp.setStatus(OTPStatus.TOO_MANY_ATTEMPTS);
+					 faultReason.set(FaultReason.TOO_MANY_ATTEMPTS);
+				  } else if (!otp.getPin().equals(pin) ) {
+					  faultReason.set(FaultReason.INVALID_PIN);
+				  } else if (!otp.getStatus().equals(OTPStatus.ACTIVE)) { // todo: or VERIFIED
+					  faultReason.set(FaultReason.INVALID_STATUS);
+				  } else if (otp.getExpires().isBefore(ZonedDateTime.now())) {
+					  otp.setStatus(OTPStatus.EXPIRED);
+					  faultReason.set(FaultReason.EXPIRED);
+				  } else {
+					  otp.setStatus(OTPStatus.VERIFIED);
+				  }
+
+			  	  if (!otp.getStatus().equals(OTPStatus.TOO_MANY_ATTEMPTS))
+				  	otp.setAttemptCount(otp.getAttemptCount() + 1);
+
+				  if (otp.getStatus().equals(OTPStatus.VERIFIED))
+					  return otpRepository.save(otp);
+				  else {
+					  return Mono.error(new OTPException("Error validating OTP", faultReason.get(), otp));
+				  }
+			  })
+			  .doOnError(throwable -> {
+			  	if (throwable instanceof OTPException) {
+			  		OTPException error = ((OTPException) throwable);
+			  		if (!error.getFaultReason().equals(FaultReason.NOT_FOUND) && error.getOtp() != null) {
+			  			otpRepository.save(error.getOtp()).subscribe();
+			  		}
+			  	}
+			  });
   }
 
 }
