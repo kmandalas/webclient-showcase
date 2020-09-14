@@ -28,8 +28,11 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mapping.Alias.ofNullable;
 
@@ -123,6 +126,7 @@ public class OTPService {
         // Save the OTP to local DB, in a reactive manner
         Mono<OTP> otpMono = otpRepository.save(OTP.builder()
                         .customerId(resultTuple.getT1().getAccountId())
+                        .msisdn(form.getMsisdn())
                         .pin(pin)
                         .createdOn(ZonedDateTime.now())
 						.expires(ZonedDateTime.now().plus(Duration.ofMinutes(1)))
@@ -158,7 +162,28 @@ public class OTPService {
    * @param otpId the OTP id
    */
   public Mono<OTP> resend(Long otpId, String channel, String mail) {
-    return Mono.error(UnsupportedOperationException::new); // TODO
+    return otpRepository.findById(otpId)
+            .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
+            .zipWhen(otp -> {
+
+                List<Mono<NotificationResultDTO>> monoList = List.of(channel, mail).stream()
+                        .filter(Objects::nonNull)
+                        .map(method -> webclient.build()
+                                .post()
+                                .uri(notificationServiceUrl)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .body(BodyInserters.fromValue(NotificationRequestForm.builder()
+                                        .channel(method)
+                                        .msisdn(otp.getMsisdn())
+                                        .message(otp.getPin().toString())
+                                        .build()))
+                                .retrieve()
+                                .bodyToMono(NotificationResultDTO.class))
+                        .collect(Collectors.toList());
+
+                return Flux.merge(monoList).collectList();
+            })
+            .map(Tuple2::getT1);
   }
 
   /**

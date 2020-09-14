@@ -25,6 +25,9 @@ public class OTP {
 	@Column("customer_id")
 	private Long customerId;
 
+	@Column("msisdn")
+	private String msisdn;
+
 	@Column("pin")
 	private Integer pin;
 
