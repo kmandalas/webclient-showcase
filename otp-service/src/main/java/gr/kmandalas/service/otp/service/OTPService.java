@@ -166,6 +166,9 @@ public class OTPService {
             .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
             .zipWhen(otp -> {
 
+                if (otp.getStatus() != OTPStatus.ACTIVE)
+                    return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED));
+
                 List<Mono<NotificationResultDTO>> monoList = List.of(channel, mail).stream()
                         .filter(Objects::nonNull)
                         .map(method -> webclient.build()
