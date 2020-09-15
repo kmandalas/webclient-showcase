@@ -6,7 +6,7 @@ The goal is to present the benefits and the capabilities but also the limitation
 We will present all these while building a demo project showing various applications of Spring WebFlux &amp; WebClient in a Microservices setup.
 We will follow a business problem-solution approach to make things more realistic. This is not intended to cover the majority of the reactive APIs
 but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required. Apart from Java understanding, 
-a familiarity with Spring Cloud Netflix stack is required.
+a familiarity with Spring Cloud Netflix stack is required and the basics of Docker.
 
 ## Introduction/scope
 
@@ -39,12 +39,12 @@ which we want to migrate gradually etc. In our case we will follow the [Annotate
 
 ## Scenario / Project structure
 
-We will build a simplified One Time Password (OTP) service offering the following capabilities:
+We are going to implement a simplified One Time Password (OTP) service, offering the following capabilities:
 
-* generate OTP
-* validate (use) OTP
-* resend OTP
-* get OTP status
+* Generate OTP
+* Validate (use) OTP
+* Resend OTP
+* Get OTP status
 * OTP events status
 * Get all OTPs
 
