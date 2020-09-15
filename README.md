@@ -1,11 +1,11 @@
 # webclient-showcase
-In this article we conduct a survey to help someone begin with Reactive Microservices based on the Spring framework. We combine material
-from various official and 3rd party sources along with hints and lessons learned from developing a real-world application. The goal is
-to present the benefits and the capabilities but also the limitations and challenges from adopting such technology. 
+In this article we conduct a survey about developing Reactive Microservices based on the Spring framework. We combine material
+from various official and 3rd party sources along with hints and lessons learned from personal experience developing a real-world application. 
+The goal is to present the benefits and the capabilities but also the limitations and challenges from adopting such technology. 
 
 We will present all these while building a demo project showing various applications of Spring WebFlux &amp; WebClient in a Microservices setup.
 We will follow a business problem-solution approach to make things more realistic. This is not intended to cover the majority of the reactive APIs
-but should be enough to give you a good idea what lies ahead if you enter this domain.
+but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required.
 
 ## Introduction/scope
 
