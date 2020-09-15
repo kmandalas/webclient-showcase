@@ -92,6 +92,7 @@ public class OTPService {
     Mono<CustomerDTO> customerInfo = loadbalanced.build()
             .get()
             .uri(customerURI)
+			// .header("Authorization", String.format("%s %s", "Bearer", tokenUtils.getAccessToken()))
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .onStatus(HttpStatus::is4xxClientError,
