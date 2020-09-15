@@ -121,8 +121,8 @@ For the 2nd issue we need to propagate the access token within the `header` attr
 ```
 
 In the snippet above, we assume we have a utility method that gets a JWT token from the incoming request forwarded via Spring Cloud Gateway 
-to the **otp-service** and passes it on to **the customer-service**. Keep in mind that the following settings are also needed 
-in the [application.yml](https://github.com/kmandalas/webclient-showcase/blob/master/gateway-service/src/main/resources/application.yml) 
+to the **otp-service**. We use this in order to set the "Authorization" header attribute with the value of the Bearer token effectively passing it 
+on to **the customer-service**. Keep in mind that the following settings are also needed in the [application.yml](https://github.com/kmandalas/webclient-showcase/blob/master/gateway-service/src/main/resources/application.yml) 
 of the **gateway-service** in order to allow this relay:
 ```
 globalcors:
