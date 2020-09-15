@@ -5,7 +5,8 @@ The goal is to present the benefits and the capabilities but also the limitation
 
 We will present all these while building a demo project showing various applications of Spring WebFlux &amp; WebClient in a Microservices setup.
 We will follow a business problem-solution approach to make things more realistic. This is not intended to cover the majority of the reactive APIs
-but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required.
+but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required. Apart from Java understanding, 
+a familiarity with Spring Cloud Netflix stack is required.
 
 ## Introduction/scope
 
@@ -16,13 +17,13 @@ In this scenario, the servlet spec can be switched to an architecture created up
 This kind of architecture fits better than servlet for the cloud environments.
 Spring Framework has been creating the Spring WebFlux to helps developers to create Reactive Web Applications [[1]](https://www.packtpub.com/application-development/developing-java-applications-spring-and-spring-boot).
 
-Spring WebFlux which is based on Project Reactor allows us to:
+Spring WebFlux, which is based on Project Reactor, allows us to:
 * move from blocking to non-blocking code and do more work with fewer resources
-* the potential to handle massive numbers of concurrent connections
-* to satisfy more concurrent users with fewer microservice instances
-* apply back-pressure and ensures better resilience between decoupled components
+* increase potential to handle massive numbers of concurrent connections
+* satisfy more concurrent users with fewer microservice instances
+* apply back-pressure and ensure better resilience between decoupled components
 
-In this demo we will primarily focus on the reactive WebClient component making calls to remote services which is actually a good starting point
+In our demo project we will center around the reactive WebClient component making calls to remote services. This is actually a good starting point
 and a pretty common case. As stated in [[2]](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-framework-choice) 
 the greater the latency per call or the interdependency among calls, the more dramatic the performance benefits are. 
 An extra motivation for this approach is the fact that since Spring version 5.0, 
@@ -30,7 +31,7 @@ the `org.springframework.web.client.RestTemplate` class is in maintenance mode, 
 going forward. Therefore, it is advised to start using the `org.springframework.web.reactive.client.WebClient` which has a more modern API.
 Moreover it supports sync, async, and streaming scenarios.
 
-We built a sample application based on a minimal Microservices architecture and demonstrate a number of capabilities driven by the requirements
+We will build a sample application based on a minimal Microservices architecture and demonstrate a number of capabilities driven by the requirements
 of each use-case. With the reactive WebClient we can return reactive types (e.g. Flux or Mono) directly from Spring MVC controller methods.
 Spring MVC controllers can call other reactive components too. A mix is also possible in case we have some endpoints and services which cannot
 become reactive for a number of reasons such as: blocking dependencies with no reactive alternatives or we may have an existing legacy app 
@@ -59,9 +60,15 @@ Of course these will be mocked for simplicity. These "3rd-party" services are:
 * **notification-service:** delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
 
 In order to simulate a microservices setup, we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery and
-Spring Cloud Gateway. We will go with Spring Cloud Loadbalancer (instead of *Ribbon*) for client-side load balancing and with 
-**@LoadBalanced WebClient** (instead of *Feign*) for service-to-service communication. Apart from this each microservice will be based on Spring Boot and we will also bring Spring Data R2DBC into play in order to integrate with
-a PostgreSQL database using a reactive driver. A diagram of our components is shown below:
+Spring Cloud Gateway. We choose Spring Cloud Gateway instead of *Zuul* for the following reasons:
+* Spring Cloud Gateway is reactive by nature and runs on Netty
+* Spring Team has moved most of Spring Cloud Netflix components (Ribbon, Hystrix, Zuul) into maintenance mode
+* Spring Team does not intend to port-in `Zuul 2` which is also reactive in contrast to `Zuul 1`
+
+We will go with Spring Cloud Loadbalancer (instead of *Ribbon*) for client-side load balancing and with 
+**@LoadBalanced WebClient** (instead of *Feign*) for service-to-service communication. Apart from this, each microservice will be based on 
+Spring Boot. We will also bring Spring Data R2DBC into play in order to integrate with a PostgreSQL database using a reactive driver. 
+A diagram of our components is shown below:
 
 ![Image of Microservices](/diagrams/WebClientShowcase.png)
 
@@ -72,22 +79,22 @@ We have Integration tests covering each microservice endpoint and we use [HoverF
 Business requirement
 
 > Given the number of a user in [E.164](https://en.wikipedia.org/wiki/E.164) format: 
-> 1. fetch customer data from customer-service and in parallel validate the number status using the number-information service
+> 1. fetch customer data from **customer-service** and in parallel validate the number status using the **number-information** service
 > 2. produce an OTP pin and save it in the DB
-> 3. invoke the notification-service to deliver it
+> 3. invoke the **notification-service** to deliver it
 > 4. return response 
 
 Solution
  
 First of all, we see that we need to communicate with 1 internal microservice (service-to-service communication) and with 2 external (remote) services.
 
-As already mentioned we choose to go with `@LoadBalanced WebClient`, therefore we you need to have a loadbalancer implementation in the classpath. 
-In our case we have added the `org.springframework.cloud:spring-cloud-loadbalancer` dependency to the project. 
-Then, `ReactiveLoadBalancer` will be used underneath. Alternatively, this functionality will also work with `spring-cloud-starter-netflix-ribbon`, 
-but the request will be then handled by a non-reactive `LoadBalancerClient` under the hood.Additionally, `spring-cloud-starter-netflix-ribbon` 
-is already in maintenance mode, so it is not recommended for new projects [[10]](https://cloud.spring.io/spring-cloud-static/spring-cloud-commons/2.1.6.RELEASE/multi/multi__spring_cloud_commons_common_abstractions.html#_spring_webclient_as_a_load_balancer_client)
+As already mentioned we choose to go with `@LoadBalanced WebClient`, therefore we you need to have a *loadbalancer* implementation in the classpath. 
+In our case we have added the `org.springframework.cloud:spring-cloud-loadbalancer` dependency to the project. This way, a `ReactiveLoadBalancer` 
+will be used under the hood. Alternatively, this functionality could also work with `spring-cloud-starter-netflix-ribbon`, 
+but the request would then be handled by a non-reactive `LoadBalancerClient`. Additionally, `spring-cloud-starter-netflix-ribbon` is already 
+in maintenance mode, so it is not recommended for new projects [[10]](https://cloud.spring.io/spring-cloud-static/spring-cloud-commons/2.1.6.RELEASE/multi/multi__spring_cloud_commons_common_abstractions.html#_spring_webclient_as_a_load_balancer_client)
 
-One more thing we need, is to disable Ribbon in the application properties of our services:
+One more thing we need, is to disable *Ribbon* in the application properties of our services:
 ```
 spring:
     loadbalancer:
@@ -99,11 +106,11 @@ Finally a note about *Feign* which was a quite popular choice till now along wit
 project does not currently support reactive clients, neither does Spring Cloud OpenFeign. Therefore we will not use it. For more details
 check [here](https://cloud.spring.io/spring-cloud-openfeign/reference/html/#reactive-support)
 
-Here are a couple of practical issues that one may face with real-world applications:
+Now, here are a couple of practical issues that one may face with real-world applications:
 1. the need for [Multiple WebClient Objects](https://cloud.spring.io/spring-cloud-commons/2.1.x/multi/multi__spring_cloud_commons_common_abstractions.html#_multiple_webclient_objects)
-2. propagate a JWT token in case we have our various endpoints protected
+2. to propagate a JWT token in case we have our various endpoints protected
 
-In order to deal with the 1st issue we will declare 2 different WebClient Beans inside our `WebClientConfig` class.
+In order to deal with the 1st issue, we will declare 2 different WebClient Beans inside our `WebClientConfig` class.
 This is necessary since service-discovery and load-balancing is only applicable to our own domain and services. 
 Therefore we need to use different instances of WebClient Beans which of course may have additional differences in configuration (e.g. timeouts)
 than the `@LoadBalanced` annotation.
@@ -114,7 +121,7 @@ For the 2nd issue we need to propagate the access token within the `header` attr
 ```
 
 In the snippet above, we assume we have a utility method that gets a JWT token from the incoming request forwarded via Spring Cloud Gateway 
-to the **otp-service** (via the Gateway) and passes it on to **the customer-service**. Keep in mind that the following settings are also needed 
+to the **otp-service** and passes it on to **the customer-service**. Keep in mind that the following settings are also needed 
 in the [application.yml](https://github.com/kmandalas/webclient-showcase/blob/master/gateway-service/src/main/resources/application.yml) 
 of the **gateway-service** in order to allow this relay:
 ```
@@ -146,9 +153,6 @@ https://github.com/spring-projects/spring-framework/issues/25547
 
 Logback AsyncAppender
 
-#### Async SOAP
-Based on [6] but with ApacheCXF instead
-
 #### Reactive types support for @Cacheable methods
 
 Spring's `@Cacheable` annotation is a convenient approach to handle caching usually at the services level. This cache abstractions works
@@ -166,6 +170,8 @@ there is no plan at the moment to add a reactive cache implementation:
 #### Long response time
 
 
+#### Async SOAP
+Based on [6] but with ApacheCXF instead
 
 
 ### How to run
