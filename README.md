@@ -1,5 +1,5 @@
 # webclient-showcase
-In this article aims to be an introduction to developing Reactive Microservices based on the Spring framework. We combine material
+This article aims to be an introduction to developing Reactive Microservices based on the Spring framework. We combine material
 from various official and 3rd party sources along with hints and lessons learned from personal experience putting together a real-world application. 
 The goal is to present the benefits and the capabilities but also the limitations and challenges from adopting such technology. 
 
@@ -193,7 +193,7 @@ public ThreadPoolTaskExecutor taskExecutor() {
    executor.setCorePoolSize(5);
    executor.setMaxPoolSize(10);
    executor.setQueueCapacity(100);
-   executor.setThreadNamePrefix("slow-");
+   executor.setThreadNamePrefix("otp-");
    executor.initialize();
    return executor;
 }
@@ -223,6 +223,7 @@ TODO
 
 
 #### Testing & debugging
+TODO
 
 
 #### Async SOAP
