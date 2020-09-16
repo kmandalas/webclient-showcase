@@ -1,12 +1,14 @@
 # webclient-showcase
-In this article we conduct a survey about developing Reactive Microservices based on the Spring framework. We combine material
-from various official and 3rd party sources along with hints and lessons learned from personal experience developing a real-world application. 
+In this article aims to be an introduction to developing Reactive Microservices based on the Spring framework. We combine material
+from various official and 3rd party sources along with hints and lessons learned from personal experience putting together a real-world application. 
 The goal is to present the benefits and the capabilities but also the limitations and challenges from adopting such technology. 
 
 We will present all these while building a demo project showing various applications of Spring WebFlux &amp; WebClient in a Microservices setup.
 We will follow a business problem-solution approach to make things more realistic. This is not intended to cover the majority of the reactive APIs
-but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required. Apart from Java understanding, 
-a familiarity with Spring Cloud Netflix stack is required and the basics of Docker.
+but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required. 
+
+Apart from Java understanding, a familiarity with Spring Cloud Netflix stack is required, basic knowledge of [Project Reactor](https://projectreactor.io) 
+(what is a Mono, what is a Flux) and the very basics of Docker.
 
 ## Introduction/scope
 
@@ -60,7 +62,11 @@ Of course these will be mocked for simplicity. These "3rd-party" services are:
 * **notification-service:** delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
 
 In order to simulate a microservices setup, we will use Spring Cloud with [HashiCorp Consul](https://www.consul.io) for service discovery and
-Spring Cloud Gateway. We choose Spring Cloud Gateway instead of *Zuul* for the following reasons:
+Spring Cloud Gateway. There is no particular reason for not going with Eureka, just have in mind that Consul can play the role of a 
+centralized configuration server as well while with Eureka only we need to have a separate [Spring Cloud Config](https://cloud.spring.io/spring-cloud-config/reference/html/) 
+server.
+
+We choose Spring Cloud Gateway instead of *Zuul* for the following reasons:
 * Spring Cloud Gateway is reactive by nature and runs on Netty
 * Spring Team has moved most of Spring Cloud Netflix components (Ribbon, Hystrix, Zuul) into maintenance mode
 * Spring Team does not intend to port-in `Zuul 2` which is also reactive in contrast to `Zuul 1`
@@ -91,8 +97,8 @@ First of all, we see that we need to communicate with 1 internal microservice (s
 As already mentioned we choose to go with `@LoadBalanced WebClient`, therefore we you need to have a *loadbalancer* implementation in the classpath. 
 In our case we have added the `org.springframework.cloud:spring-cloud-loadbalancer` dependency to the project. This way, a `ReactiveLoadBalancer` 
 will be used under the hood. Alternatively, this functionality could also work with `spring-cloud-starter-netflix-ribbon`, 
-but the request would then be handled by a non-reactive `LoadBalancerClient`. Additionally, `spring-cloud-starter-netflix-ribbon` is already 
-in maintenance mode, so it is not recommended for new projects [[10]](https://cloud.spring.io/spring-cloud-static/spring-cloud-commons/2.1.6.RELEASE/multi/multi__spring_cloud_commons_common_abstractions.html#_spring_webclient_as_a_load_balancer_client)
+but the request would then be handled by a non-reactive `LoadBalancerClient` plus, like we said, *Ribbon* is already in maintenance mode, 
+so it is not recommended for new projects [[10]](https://cloud.spring.io/spring-cloud-static/spring-cloud-commons/2.1.6.RELEASE/multi/multi__spring_cloud_commons_common_abstractions.html#_spring_webclient_as_a_load_balancer_client)
 
 One more thing we need, is to disable *Ribbon* in the application properties of our services:
 ```
@@ -146,8 +152,6 @@ the execution stops immediately. If we want to delay errors and execute all Mono
 
 ### Other topics
 
-#### BlockHound
-
 #### Logging
 https://github.com/spring-projects/spring-framework/issues/25547
 
@@ -166,12 +170,22 @@ there is no plan at the moment to add a reactive cache implementation:
 
 * https://jira.spring.io/browse/DATAREDIS-967
 
+#### Long response times
+TODO
 
-#### Long response time
+
+#### BlockHound
+TODO
+
+#### Distributed Tracing
+TODO
+
+
+#### Testing & debugging
 
 
 #### Async SOAP
-Based on [6] but with ApacheCXF instead
+Based on [6] but can be done with with ApacheCXF as well
 
 
 ### How to run
