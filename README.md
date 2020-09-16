@@ -149,19 +149,26 @@ the execution stops immediately. If we want to delay errors and execute all Mono
 * We use the ***zipWhen*** method to trigger the notification-service only after the DB interaction has finished
 * Finally, we use ***map*** method in order to select our return value which in our case is the data object that was previously saved in the DB
 
+For a full list of options you may check the [Mono API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html).
 
 ### Other topics
 
 #### Logging
-https://github.com/spring-projects/spring-framework/issues/25547
 
-Logback AsyncAppender
+Logging is an important aspect for every kind of software. Solutions based on Microservices architectures have additional demands for
+centralized logging. However when we are using File Appenders for logging then we have an issue since this I/O operation is blocking.
+See the following issue for example:
+* https://github.com/spring-projects/spring-framework/issues/25547
+
+A solution is to select and configure Async Appenders which seem to be supported by major SLF4J implementations like Log4j and Logback.
+In our example we go with the [Logback AsyncAppender](http://logback.qos.ch/manual/appenders.html#AsyncAppender). An example configuration
+can be seen [here](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/main/resources/logback-spring.xml)
 
 #### Reactive types support for @Cacheable methods
 
 Spring's `@Cacheable` annotation is a convenient approach to handle caching usually at the services level. This cache abstractions works
 seamlessly with various caching implementations including JSR-107 compliant caches, Redis etc. However, at the moment of writing there is
-still no Reactive types support for @Cacheable methods. The related is issue is:
+still no Reactive types support for `@Cacheable` methods. The related is issue is:
 
 * https://github.com/spring-projects/spring-framework/issues/17920
 
@@ -170,9 +177,43 @@ there is no plan at the moment to add a reactive cache implementation:
 
 * https://jira.spring.io/browse/DATAREDIS-967
 
-#### Long response times
-TODO
+#### Handling special cases
+On a typical Spring WebFlux server (Netty), you can expect one thread for the server and several others for request processing 
+which are typically as many as the number of CPU cores. Although WebClient does not block the thread, sometimes it is desired to use 
+another thread pool than the main worker thread pool shared with the server. Such cases may be calls to remote endpoints with very long 
+response times or increased level of concurrency e.g. we want to submit 10 calls in parallel cause we know we can afford it and it suits our scenario :)
 
+For this purpose, Spring WebFlux provides thread pool abstractions called **Schedulers**. You may use it to create different concurrency strategies. 
+If you prefer to have a full control of the minimum and maximum number of threads in the pool you should define your own task executor as 
+shown below:
+```
+Bean
+public ThreadPoolTaskExecutor taskExecutor() {
+   ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+   executor.setCorePoolSize(5);
+   executor.setMaxPoolSize(10);
+   executor.setQueueCapacity(100);
+   executor.setThreadNamePrefix("slow-");
+   executor.initialize();
+   return executor;
+}
+```
+
+Let's now imagine that we want to check the status of five MSISDNs simultaneously and return the result as a list of NotificationResultDTOs:
+```
+public Flux<NotificationResultDTO> checkMsisdns(List<String> msisdns) {
+    return Flux.fromIterable(msisdns)
+        .parallel()
+        .runOn(Schedulers.fromExecutor(taskExecutor))
+        .flatMap(this::checkMsisdn)
+        .sequential() 
+}
+```
+
+At the point where we call the ***parallel*** method, it creates a ParallelFlux. This indicates the simultaneous character of the execution.
+At the ***runOn*** method we plugin our task executor and finally we need to specify how to convert ParallelFlux to simple Flux. We select
+to do this in a sequential manner while other options exist for the results to follow specific order. For a full list of options you may
+check the [ParallelFlux API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/ParallelFlux.html).
 
 #### BlockHound
 TODO
@@ -207,7 +248,7 @@ That makes applications more resilient under load, because they scale in a more 
 In order to observe those benefits, however, you need to have some latency (including a mix of slow and unpredictable network I/O). 
 That is where the reactive stack begins to show its strengths, and the differences can be dramatic [[3]](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-performance).
 
-Some interesting load testing and comparison results are presented at [Spring Boot performance battle: blocking vs non-blocking vs reactive](https://medium.com/@filia.aleks/microservice-performance-battle-spring-mvc-vs-webflux-80d39fd81bf0). 
+Some interesting load testing and comparison results are presented at [[4]](https://medium.com/@filia.aleks/microservice-performance-battle-spring-mvc-vs-webflux-80d39fd81bf0). 
 The conclusion is that Spring Webflux with WebClient and Apache clients "win" in all cases. 
 The most significant difference (4 times faster than blocking Servlet) comes when underlying service is slow (500ms). 
 It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it does not create a lot of threads comparing with Servlet (20 vs 220).
@@ -226,7 +267,7 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 
 [6] https://godatadriven.com/blog/reactive-web-service-client-with-jax-ws/
 
-[7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M&t=11s (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
+[7]* https://www.youtube.com/watch?v=IZ2SoXUiS7M (Guide to "Reactive" for Spring MVC Developers, by Rossen Stoyanchev)
 
 [8] https://www.baeldung.com/spring-webflux-concurrency
 
