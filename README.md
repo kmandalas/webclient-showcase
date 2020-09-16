@@ -228,7 +228,6 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 - [x] .zip
 - [x] .zipWhen
 - [x] .zipDelayError
-- [ ] .zipOnNext
 - [ ] .doOnNext
 - [x] .doOnSuccess VS .doOnError
 - [x] Chaining of calls (Sequential execution)
