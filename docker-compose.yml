@@ -27,6 +27,8 @@ services:
     restart: on-failure
     build: otp-service/.
     image: webclient-showcase/otp-service:1
+    volumes:
+      - ${PWD}:/logs/otp
     ports:
       - "8001:8001"
     networks:

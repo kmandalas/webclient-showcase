@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+	<property name="LOG_DIR" value="${PWD}:/logs/otp" />
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss} %5p [%X{X-B3-TraceId:-}] - [%thread] %logger{0} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${LOG_DIR}/otp-service.log</file>
+		<encoder>
+			<charset>UTF-8</charset>
 			<pattern>%d{HH:mm:ss} %5p [%X{X-B3-TraceId:-}] - [%thread] %logger{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
 		<appender-ref ref="STDOUT" />
 		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+		<queueSize>1</queueSize> <!-- default 256 -->
+		<includeCallerData>false</includeCallerData> <!-- default false -->
+		<neverBlock>true</neverBlock> <!-- default false, set to true to cause the Appender not block the application and just drop the messages -->
+	</appender>
+	<appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+		<appender-ref ref="FILE" />
 		<queueSize>1</queueSize> <!-- default 256 -->
 		<includeCallerData>false</includeCallerData> <!-- default false -->
 		<neverBlock>true</neverBlock> <!-- default false, set to true to cause the Appender not block the application and just drop the messages -->
@@ -21,6 +37,7 @@
 
 	<root level="WARN">
 		<appender-ref ref="ASYNC_CONSOLE" />
+		<appender-ref ref="ASYNC_FILE" />
 	</root>
 
 </configuration>
