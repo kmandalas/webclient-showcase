@@ -3,7 +3,7 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss} [%thread] %logger{0} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss} %5p [%X{X-B3-TraceId:-}] - [%thread] %logger{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">

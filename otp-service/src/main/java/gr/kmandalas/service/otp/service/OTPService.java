@@ -63,6 +63,7 @@ public class OTPService {
    * @param customerId optional filter of customerId
    */
   public Flux<OTP> getAll(Long customerId) {
+    log.info("Entered getAll with argument: {}", customerId);
     return otpRepository.findAll()
         .filter(otp -> !ofNullable(customerId).isPresent() || otp.getCustomerId().equals(customerId));
   }
@@ -72,6 +73,7 @@ public class OTPService {
    * @param otpId the OTP id
    */
   public Mono<OTP> get(Long otpId) {
+    log.info("Entered get with argument: {}", otpId);
     return otpRepository.findById(otpId)
         .switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
   }
@@ -81,6 +83,7 @@ public class OTPService {
    * @param form the form
    */
   public Mono<OTP> send(SendForm form) {
+    log.info("Entered send with argument: {}", form);
     String customerURI = UriComponentsBuilder
             .fromHttpUrl("http://customer-service/customers")
             .queryParam("number", form.getMsisdn())
@@ -162,6 +165,7 @@ public class OTPService {
    * @param otpId the OTP id
    */
   public Mono<OTP> resend(Long otpId, String channel, String mail) {
+    log.info("Entered resend with arguments: {}, {}, {}", otpId, channel, mail);
     return otpRepository.findById(otpId)
             .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
             .zipWhen(otp -> {
@@ -196,7 +200,8 @@ public class OTPService {
    * @param pin the OTP PIN number
    */
   public Mono<OTP> validate(Long otpId, Integer pin) {
-  	  AtomicReference<FaultReason> faultReason = new AtomicReference<>();
+      log.info("Entered resend with arguments: {}, {}", otpId, pin);
+      AtomicReference<FaultReason> faultReason = new AtomicReference<>();
 
 	  return otpRepository.findById(otpId)
 			  .switchIfEmpty(Mono.error(new OTPException("Error validating OTP", FaultReason.NOT_FOUND)))
