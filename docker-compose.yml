@@ -28,7 +28,7 @@ services:
     build: otp-service/.
     image: webclient-showcase/otp-service:1
     volumes:
-      - ${PWD}:/logs/otp # TODO
+      - C://logs:/home/otp/logs # TODO: using "C://" makes it os-dependent...
     ports:
       - "8001:8001"
     networks:
@@ -44,6 +44,8 @@ services:
       - NOTIFICATION_SERVICE_PORT=8005
       - NUMBER-INFORMATION_SERVICE_HOST=number-information-service
       - NUMBER-INFORMATION_SERVICE_PORT=8006
+#      - LOGGING_FILE_PATH=/home/otp/logs
+#      - LOGGING_FILE_NAME=otp-service.log
 
   customer-service:
     restart: on-failure

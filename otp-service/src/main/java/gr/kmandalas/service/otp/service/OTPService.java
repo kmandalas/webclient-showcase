@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.blockhound.BlockHound;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -63,7 +64,9 @@ public class OTPService {
    * @param customerId optional filter of customerId
    */
   public Flux<OTP> getAll(Long customerId) {
-    log.info("Entered getAll with argument: {}", customerId);
+	  BlockHound.install();
+	  log.info("Entered getAll with argument: {}", customerId);
+
     return otpRepository.findAll()
         .filter(otp -> !ofNullable(customerId).isPresent() || otp.getCustomerId().equals(customerId));
   }
@@ -74,6 +77,7 @@ public class OTPService {
    */
   public Mono<OTP> get(Long otpId) {
     log.info("Entered get with argument: {}", otpId);
+
     return otpRepository.findById(otpId)
         .switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
   }
@@ -83,81 +87,82 @@ public class OTPService {
    * @param form the form
    */
   public Mono<OTP> send(SendForm form) {
-    log.info("Entered send with argument: {}", form);
-    String customerURI = UriComponentsBuilder
-            .fromHttpUrl("http://customer-service/customers")
-            .queryParam("number", form.getMsisdn())
-            .toUriString();
+  	log.info("Entered send with argument: {}", form);
 
-    String numberInfoURI = UriComponentsBuilder
-            .fromHttpUrl(numberInformationServiceUrl)
-            .queryParam("msisdn", form.getMsisdn())
-            .toUriString();
+	String customerURI = UriComponentsBuilder
+			.fromHttpUrl("http://customer-service/customers")
+			.queryParam("number", form.getMsisdn())
+			.toUriString();
 
-    // 1st call to customer-service using service discovery, to retrieve customer related info
-    Mono<CustomerDTO> customerInfo = loadbalanced.build()
-            .get()
-            .uri(customerURI)
+	String numberInfoURI = UriComponentsBuilder
+			.fromHttpUrl(numberInformationServiceUrl)
+			.queryParam("msisdn", form.getMsisdn())
+			.toUriString();
+
+	// 1st call to customer-service using service discovery, to retrieve customer related info
+	Mono<CustomerDTO> customerInfo = loadbalanced.build()
+			.get()
+			.uri(customerURI)
 			// .header("Authorization", String.format("%s %s", "Bearer", tokenUtils.getAccessToken()))
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .onStatus(HttpStatus::is4xxClientError,
-                    clientResponse -> Mono.error(new OTPException("Error retrieving Customer", FaultReason.CUSTOMER_ERROR)))
-            .bodyToMono(CustomerDTO.class);
+			.accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxClientError,
+					clientResponse -> Mono.error(new OTPException("Error retrieving Customer", FaultReason.CUSTOMER_ERROR)))
+			.bodyToMono(CustomerDTO.class);
 
-    // 2nd call to external service, to check that the MSISDN is valid
-    Mono<String> msisdnStatus = webclient.build()
-            .get()
-            .uri(numberInfoURI)
-            .exchange()
-            .flatMap(clientResponse -> {
-                if (!clientResponse.statusCode().is2xxSuccessful())
-                    return Mono.error(new OTPException("Error retrieving msisdn status", FaultReason.NUMBER_INFORMATION_ERROR));
-                return clientResponse.bodyToMono(String.class);
-            });
+	// 2nd call to external service, to check that the MSISDN is valid
+	Mono<String> msisdnStatus = webclient.build()
+			.get()
+			.uri(numberInfoURI)
+			.exchange()
+			.flatMap(clientResponse -> {
+				if (!clientResponse.statusCode().is2xxSuccessful())
+					return Mono.error(new OTPException("Error retrieving msisdn status", FaultReason.NUMBER_INFORMATION_ERROR));
+				return clientResponse.bodyToMono(String.class);
+			});
 
-    // Combine the results in a single Mono, that completes when both calls have returned.
-    // If an error occurs in one of the Monos, execution stops immediately.
-    // If we want to delay errors and execute all Monos, then we can use zipDelayError instead
-    Mono<Tuple2<CustomerDTO, String>> zippedCalls = Mono.zip(customerInfo, msisdnStatus);
+	// Combine the results in a single Mono, that completes when both calls have returned.
+	// If an error occurs in one of the Monos, execution stops immediately.
+	// If we want to delay errors and execute all Monos, then we can use zipDelayError instead
+	Mono<Tuple2<CustomerDTO, String>> zippedCalls = Mono.zip(customerInfo, msisdnStatus);
 
-    // Perform additional actions after the combined mono has returned
-    return zippedCalls.flatMap(resultTuple -> {
+	// Perform additional actions after the combined mono has returned
+	return zippedCalls.flatMap(resultTuple -> {
 
-        // After the calls have completed, generate a random pin
-        int pin = 100000 + new Random().nextInt(900000);
+		// After the calls have completed, generate a random pin
+		int pin = 100000 + new Random().nextInt(900000);
 
-        // Save the OTP to local DB, in a reactive manner
-        Mono<OTP> otpMono = otpRepository.save(OTP.builder()
-                        .customerId(resultTuple.getT1().getAccountId())
-                        .msisdn(form.getMsisdn())
-                        .pin(pin)
-                        .createdOn(ZonedDateTime.now())
+		// Save the OTP to local DB, in a reactive manner
+		Mono<OTP> otpMono = otpRepository.save(OTP.builder()
+						.customerId(resultTuple.getT1().getAccountId())
+						.msisdn(form.getMsisdn())
+						.pin(pin)
+						.createdOn(ZonedDateTime.now())
 						.expires(ZonedDateTime.now().plus(Duration.ofMinutes(1)))
-                        .status(OTPStatus.ACTIVE)
-                        .applicationId("PPR")
-                        .attemptCount(0)
-                        .build());
+						.status(OTPStatus.ACTIVE)
+						.applicationId("PPR")
+						.attemptCount(0)
+						.build());
 
-        // External notification service invocation
-        Mono<NotificationResultDTO> notificationResultDTOMono = webclient.build()
-                .post()
-                .uri(notificationServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(NotificationRequestForm.builder()
-                        .channel(Channel.AUTO.name())
-                        .msisdn(form.getMsisdn())
-                        .message(String.valueOf(pin))
-                        .build()))
-                .retrieve()
-                .bodyToMono(NotificationResultDTO.class);
+		// External notification service invocation
+		Mono<NotificationResultDTO> notificationResultDTOMono = webclient.build()
+				.post()
+				.uri(notificationServiceUrl)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(NotificationRequestForm.builder()
+						.channel(Channel.AUTO.name())
+						.msisdn(form.getMsisdn())
+						.message(String.valueOf(pin))
+						.build()))
+				.retrieve()
+				.bodyToMono(NotificationResultDTO.class);
 
-        // When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel.
-        // The results are combined in a single Mono:
-        return otpMono.zipWhen(otp -> notificationResultDTOMono)
-                // Return only the result of the first call (DB)
-                .map(Tuple2::getT1);
-    });
+		// When this operation is complete, the external notification service will be invoked, to send the OTP though the default channel.
+		// The results are combined in a single Mono:
+		return otpMono.zipWhen(otp -> notificationResultDTOMono)
+				// Return only the result of the first call (DB)
+				.map(Tuple2::getT1);
+	});
   }
 
   /**
@@ -167,12 +172,13 @@ public class OTPService {
    */
   public Mono<OTP> resend(Long otpId, String channel, String mail) {
     log.info("Entered resend with arguments: {}, {}, {}", otpId, channel, mail);
+
     return otpRepository.findById(otpId)
             .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
             .zipWhen(otp -> {
 
                 if (otp.getStatus() != OTPStatus.ACTIVE)
-                    return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED));
+                    return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED)); // todo: maybe other reason(s) too
 
                 List<Mono<NotificationResultDTO>> monoList = List.of(channel, mail).stream()
                         .filter(Objects::nonNull)
@@ -182,8 +188,8 @@ public class OTPService {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .body(BodyInserters.fromValue(NotificationRequestForm.builder()
                                         .channel(method)
-                                        .msisdn(otp.getMsisdn())
-                                        .message(otp.getPin().toString())
+                                        .msisdn(otp.getMsisdn()) // todo: this needs to be the msisdn OR the e-mail
+                                        .message(otp.getPin().toString()) // todo: message if different for e-mail
                                         .build()))
                                 .retrieve()
                                 .bodyToMono(NotificationResultDTO.class))
@@ -202,8 +208,8 @@ public class OTPService {
    */
   public Mono<OTP> validate(Long otpId, Integer pin) {
       log.info("Entered resend with arguments: {}, {}", otpId, pin);
-      AtomicReference<FaultReason> faultReason = new AtomicReference<>();
 
+      AtomicReference<FaultReason> faultReason = new AtomicReference<>();
 	  return otpRepository.findById(otpId)
 			  .switchIfEmpty(Mono.error(new OTPException("Error validating OTP", FaultReason.NOT_FOUND)))
 			  .zipWhen(otp -> applicationRepository.findById(otp.getApplicationId()))
