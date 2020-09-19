@@ -28,7 +28,7 @@ services:
     build: otp-service/.
     image: webclient-showcase/otp-service:1
     volumes:
-      - ${PWD}:/logs/otp
+      - ${PWD}:/logs/otp # TODO
     ports:
       - "8001:8001"
     networks:
