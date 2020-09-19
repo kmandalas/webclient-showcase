@@ -289,3 +289,5 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 - [x] Chaining of calls (Sequential execution)
 - [x] Service-to-service communication
 - [x] Database interaction (r2dbc/postgresql)
+
+![Java CI with Maven](https://github.com/kmandalas/webclient-showcase/workflows/Java%20CI%20with%20Maven/badge.svg)
