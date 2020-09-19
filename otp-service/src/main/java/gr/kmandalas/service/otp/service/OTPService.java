@@ -28,8 +28,11 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mapping.Alias.ofNullable;
 
@@ -60,6 +63,7 @@ public class OTPService {
    * @param customerId optional filter of customerId
    */
   public Flux<OTP> getAll(Long customerId) {
+    log.info("Entered getAll with argument: {}", customerId);
     return otpRepository.findAll()
         .filter(otp -> !ofNullable(customerId).isPresent() || otp.getCustomerId().equals(customerId));
   }
@@ -69,6 +73,7 @@ public class OTPService {
    * @param otpId the OTP id
    */
   public Mono<OTP> get(Long otpId) {
+    log.info("Entered get with argument: {}", otpId);
     return otpRepository.findById(otpId)
         .switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
   }
@@ -78,6 +83,7 @@ public class OTPService {
    * @param form the form
    */
   public Mono<OTP> send(SendForm form) {
+    log.info("Entered send with argument: {}", form);
     String customerURI = UriComponentsBuilder
             .fromHttpUrl("http://customer-service/customers")
             .queryParam("number", form.getMsisdn())
@@ -124,6 +130,7 @@ public class OTPService {
         // Save the OTP to local DB, in a reactive manner
         Mono<OTP> otpMono = otpRepository.save(OTP.builder()
                         .customerId(resultTuple.getT1().getAccountId())
+                        .msisdn(form.getMsisdn())
                         .pin(pin)
                         .createdOn(ZonedDateTime.now())
 						.expires(ZonedDateTime.now().plus(Duration.ofMinutes(1)))
@@ -159,7 +166,32 @@ public class OTPService {
    * @param otpId the OTP id
    */
   public Mono<OTP> resend(Long otpId, String channel, String mail) {
-    return Mono.error(UnsupportedOperationException::new); // TODO
+    log.info("Entered resend with arguments: {}, {}, {}", otpId, channel, mail);
+    return otpRepository.findById(otpId)
+            .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
+            .zipWhen(otp -> {
+
+                if (otp.getStatus() != OTPStatus.ACTIVE)
+                    return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED));
+
+                List<Mono<NotificationResultDTO>> monoList = List.of(channel, mail).stream()
+                        .filter(Objects::nonNull)
+                        .map(method -> webclient.build()
+                                .post()
+                                .uri(notificationServiceUrl)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .body(BodyInserters.fromValue(NotificationRequestForm.builder()
+                                        .channel(method)
+                                        .msisdn(otp.getMsisdn())
+                                        .message(otp.getPin().toString())
+                                        .build()))
+                                .retrieve()
+                                .bodyToMono(NotificationResultDTO.class))
+                        .collect(Collectors.toList());
+
+                return Flux.merge(monoList).collectList();
+            })
+            .map(Tuple2::getT1);
   }
 
   /**
@@ -169,7 +201,8 @@ public class OTPService {
    * @param pin the OTP PIN number
    */
   public Mono<OTP> validate(Long otpId, Integer pin) {
-  	  AtomicReference<FaultReason> faultReason = new AtomicReference<>();
+      log.info("Entered resend with arguments: {}, {}", otpId, pin);
+      AtomicReference<FaultReason> faultReason = new AtomicReference<>();
 
 	  return otpRepository.findById(otpId)
 			  .switchIfEmpty(Mono.error(new OTPException("Error validating OTP", FaultReason.NOT_FOUND)))

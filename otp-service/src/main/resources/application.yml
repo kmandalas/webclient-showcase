@@ -32,8 +32,8 @@ management:
 
 logging:
   level:
-    gr.kmandalas: DEBUG
-    org.springframework.web: TRACE
+    gr.kmandalas: INFO
+    org.springframework.web: INFO
 
 external:
   services:

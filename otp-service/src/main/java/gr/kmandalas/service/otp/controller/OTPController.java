@@ -4,6 +4,8 @@ import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.entity.OTP;
 import gr.kmandalas.service.otp.service.OTPService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,6 +18,7 @@ public class OTPController {
   private final OTPService otpService;
 
   @GetMapping
+  @NewSpan
   public Flux<OTP> getAll(@RequestParam(required = false) Long customerId) {
     return otpService.getAll(customerId);
   }
