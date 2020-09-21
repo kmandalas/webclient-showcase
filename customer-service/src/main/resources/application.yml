@@ -23,6 +23,8 @@ spring:
     url: r2dbc:postgresql://${postgres.host:localhost}:5432/${postgres.db:test}?currentSchema=customer
     username: ${postgres.user:kmandalas}
     password: ${postgres.password:passepartout}
+  zipkin:
+    base-url: http://${jaeger.host:localhost}:9411/
 
 management:
   endpoints:

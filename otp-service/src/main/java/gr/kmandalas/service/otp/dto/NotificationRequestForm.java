@@ -13,7 +13,7 @@ public class NotificationRequestForm {
 
     @NotEmpty
     private String channel;
-    private String msisdn;
+    private String destination;
     private String message;
 
 }

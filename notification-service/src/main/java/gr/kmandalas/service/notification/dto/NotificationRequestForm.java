@@ -11,6 +11,6 @@ import javax.validation.constraints.NotEmpty;
 public class NotificationRequestForm {
     @NotEmpty
     private String channel;
-    private String msisdn;
+    private String destination;
     private String message;
 }

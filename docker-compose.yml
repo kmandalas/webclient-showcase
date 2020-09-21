@@ -44,8 +44,7 @@ services:
       - NOTIFICATION_SERVICE_PORT=8005
       - NUMBER-INFORMATION_SERVICE_HOST=number-information-service
       - NUMBER-INFORMATION_SERVICE_PORT=8006
-#      - LOGGING_FILE_PATH=/home/otp/logs
-#      - LOGGING_FILE_NAME=otp-service.log
+      - JAEGER_HOST=jaeger
 
   customer-service:
     restart: on-failure
@@ -62,6 +61,7 @@ services:
       - POSTGRES_DB=test
       - POSTGRES_USER=kmandalas
       - POSTGRES_PASSWORD=passepartout
+      - JAEGER_HOST=jaeger
 
   notification-service:
     restart: on-failure
@@ -98,6 +98,8 @@ services:
     ports:
       - "16686:16686"
       - "9411:9411"
+    networks:
+      - consul-net
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 

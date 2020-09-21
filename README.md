@@ -221,7 +221,21 @@ check the [ParallelFlux API](https://projectreactor.io/docs/core/release/api/rea
 TODO
 
 #### Distributed Tracing
-TODO
+
+We can trace all calls that are made from/to the microservices, using [Spring Cloud Sleuth](https://docs.spring.io/spring-cloud-sleuth/docs/current-SNAPSHOT/reference/html/)
+, and [Jaeger](https://www.jaegertracing.io/).
+Sleuth offers a convenient autoconfiguration that works out-of-the-box with popular frameworks like Spring MVC and Webflux.
+It allows injecting trace and span ids automatically and displaying this information in the logs, as well as annotation-based span control.
+In order to make it work with Jaeger, we need to enable the zipkin collector port in Jaeger's configuration.
+
+**Jaeger Home Page**
+![Jaeger Home](/diagrams/jaeger-home.png)
+
+**Jaeger Trace Details**
+![Jaeger Trace Details](/diagrams/jaeger-trace.png)
+
+**Jaeger Dependency Graph**
+![Jaeger Dep Graph](/diagrams/jaeger-dep-graph.png)
 
 
 #### Testing & debugging
@@ -233,6 +247,46 @@ Based on [6] but can be done with with ApacheCXF as well
 
 
 ### How to run
+
+The easiest way is to run the microservices using Docker Compose
+
+> docker-compose up --build
+
+When the containers are up and running, you can visit consul's UI to see the active services
+
+> http://localhost:8500/ui/dc1/services
+
+**Generate OTP** 
+```
+curl --location --request POST 'localhost:8000/otp-service/v1/otp' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "msisdn": "12345"
+}'
+```
+
+**Get All OTP** 
+```
+curl --location --request GET 'localhost:8000/otp-service/v1/otp'
+```
+
+**Resend OTP** 
+```
+curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=petros@icloud.com' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "msisdn": "12345"
+}'
+```
+
+**Validate OTP** 
+```
+curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=petros@icloud.com' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "msisdn": "12345"
+}'
+```
 
 #### Integration tests
 mvn clean verify
