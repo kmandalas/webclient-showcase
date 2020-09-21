@@ -146,7 +146,7 @@ public class OTPService {
                 .accept(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(NotificationRequestForm.builder()
                         .channel(Channel.AUTO.name())
-                        .msisdn(form.getMsisdn())
+                        .destination(form.getMsisdn())
                         .message(String.valueOf(pin))
                         .build()))
                 .retrieve()
@@ -165,8 +165,8 @@ public class OTPService {
    *
    * @param otpId the OTP id
    */
-  public Mono<OTP> resend(Long otpId, String channel, String mail) {
-    log.info("Entered resend with arguments: {}, {}, {}", otpId, channel, mail);
+  public Mono<OTP> resend(Long otpId, List<String> channels, String mail) {
+    log.info("Entered resend with arguments: {}, {}, {}", otpId, channels, mail);
     return otpRepository.findById(otpId)
             .switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
             .zipWhen(otp -> {
@@ -174,7 +174,7 @@ public class OTPService {
                 if (otp.getStatus() != OTPStatus.ACTIVE)
                     return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED));
 
-                List<Mono<NotificationResultDTO>> monoList = List.of(channel, mail).stream()
+                List<Mono<NotificationResultDTO>> monoList = channels.stream()
                         .filter(Objects::nonNull)
                         .map(method -> webclient.build()
                                 .post()
@@ -182,7 +182,7 @@ public class OTPService {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .body(BodyInserters.fromValue(NotificationRequestForm.builder()
                                         .channel(method)
-                                        .msisdn(otp.getMsisdn())
+                                        .destination( Channel.EMAIL.name().equals(method) ? mail : otp.getMsisdn())
                                         .message(otp.getPin().toString())
                                         .build()))
                                 .retrieve()

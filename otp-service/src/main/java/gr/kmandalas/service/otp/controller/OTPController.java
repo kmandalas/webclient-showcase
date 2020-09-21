@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/otp")
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class OTPController {
   }
 
   @PostMapping("/{otpId}")
-  public Mono<OTP> resend(@PathVariable Long otpId, @RequestParam(required = false) String via, @RequestParam(required = false) String mail) {
+  public Mono<OTP> resend(@PathVariable Long otpId, @RequestParam(required = false) List<String> via, @RequestParam(required = false) String mail) {
     return otpService.resend(otpId, via, mail);
   }
 
