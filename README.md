@@ -228,6 +228,15 @@ Sleuth offers a convenient autoconfiguration that works out-of-the-box with popu
 It allows injecting trace and span ids automatically and displaying this information in the logs, as well as annotation-based span control.
 In order to make it work with Jaeger, we need to enable the zipkin collector port in Jaeger's configuration.
 
+**Jaeger Home Page**
+![Jaeger Home](/diagrams/jaeger-home.png)
+
+**Jaeger Trace Details**
+![Jaeger Trace Details](/diagrams/jaeger-trace.png)
+
+**Jaeger Dependency Graph**
+![Jaeger Dep Graph](/diagrams/jaeger-dep-graph.png)
+
 
 #### Testing & debugging
 TODO
