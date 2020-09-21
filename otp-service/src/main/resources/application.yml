@@ -36,6 +36,9 @@ logging:
   level:
     gr.kmandalas: INFO
     org.springframework.web: INFO
+#  file:
+#    path: ${logging.file.path}
+#    name: ${logging.file.name}
 
 external:
   services:

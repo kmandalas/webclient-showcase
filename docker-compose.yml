@@ -27,6 +27,8 @@ services:
     restart: on-failure
     build: otp-service/.
     image: webclient-showcase/otp-service:1
+    volumes:
+      - C://logs:/home/otp/logs # TODO: using "C://" makes it os-dependent...
     ports:
       - "8001:8001"
     networks:
