@@ -6,7 +6,6 @@ import gr.kmandalas.service.otp.dto.SendForm;
 import gr.kmandalas.service.otp.util.PostgresContainer;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.core.HoverflyConfig;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
@@ -38,7 +36,7 @@ import java.util.Map;
 import static io.specto.hoverfly.junit.core.HoverflyMode.SIMULATE;
 import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
 import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
-import static io.specto.hoverfly.junit.dsl.HttpBodyConverter.*;
+import static io.specto.hoverfly.junit.dsl.HttpBodyConverter.json;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 import static io.specto.hoverfly.junit.dsl.matchers.HoverflyMatchers.matches;
 
@@ -132,7 +130,7 @@ public class OTPControllerIntegrationTests {
 	void testSend_success() throws Exception {
 
 		SendForm requestForm = new SendForm();
-		requestForm.setMsisdn("1234567891");
+		requestForm.setMsisdn("+306933177321");
 		webTestClient.post()
 				.uri("/v1/otp")
 				.body(Mono.just(requestForm), SendForm.class)

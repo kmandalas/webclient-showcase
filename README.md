@@ -71,7 +71,7 @@ server.
 We choose Spring Cloud Gateway instead of *Zuul* for the following reasons:
 * Spring Cloud Gateway is reactive by nature and runs on Netty
 * Spring Team has moved most of Spring Cloud Netflix components (Ribbon, Hystrix, Zuul) into maintenance mode
-* Spring Team does not intend to port-in `Zuul 2` which is also reactive in contrast to `Zuul 1`
+* Spring Team does not intend to port-in *Zuul 2* which is also reactive in contrast to *Zuul 1*
 
 We will go with Spring Cloud Loadbalancer (instead of *Ribbon*) for client-side load balancing and with 
 **@LoadBalanced WebClient** (instead of *Feign*) for service-to-service communication. Apart from this, each microservice will be based on 
@@ -164,7 +164,36 @@ See the following issue for example:
 
 A solution is to select and configure Async Appenders which seem to be supported by major SLF4J implementations like Log4j and Logback.
 In our example we go with the [Logback AsyncAppender](http://logback.qos.ch/manual/appenders.html#AsyncAppender). An example configuration
-can be seen [here](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/main/resources/logback-spring.xml)
+can be seen [here](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/main/resources/logback-spring.xml).
+
+The AsyncAppender has five (5) configuration options: 
+   
+* **_queueSize_** – The maximum capacity of the buffer size. Default value is 256.
+* **_discardingThreshold_** – Instruct to drop events once the buffer reaches the max capacity. Default value is 20%.
+* **_neverBlock_** – Setting it to true will prevent any blocking on the application threads but it comes at the cost of lost log events if 
+the AsyncAppender’s internal buffer fills up. Default value is false.
+* **_includeCallerData_** – Extracting caller data. Default value is false.
+* **_maxFlushTime_** – Specify a maximum queue flush timeout in milliseconds
+
+#### Distributed Tracing
+
+Tracing is another vital aspect of Microservices monitoring. We can trace all calls that are made from/to the microservices, 
+using [Spring Cloud Sleuth](https://docs.spring.io/spring-cloud-sleuth/docs/current-SNAPSHOT/reference/html/) and [Jaeger](https://www.jaegertracing.io/).
+
+Sleuth offers a convenient auto-configuration that works out-of-the-box with popular frameworks like Spring MVC and Webflux.
+It allows injecting trace and span IDs automatically and displaying this information in the logs, as well as annotation-based span control.
+In order to make it work with Jaeger, we need to enable the *Zipkin* collector port in Jaeger's configuration.
+
+One thing to have in mind that limitations do exist here as well. For example tracing database calls with R2DBC is not yet supported. You may
+find the related issue here:
+* https://github.com/spring-cloud/spring-cloud-sleuth/issues/1524
+
+**Jaeger Home Page**
+![Jaeger Home](/diagrams/jaeger-home.png)
+
+**Jaeger Trace Details**
+![Jaeger Trace Details](/diagrams/jaeger-trace.png)
+
 
 #### Reactive types support for @Cacheable methods
 
@@ -220,23 +249,6 @@ check the [ParallelFlux API](https://projectreactor.io/docs/core/release/api/rea
 #### BlockHound
 TODO
 
-#### Distributed Tracing
-
-We can trace all calls that are made from/to the microservices, using [Spring Cloud Sleuth](https://docs.spring.io/spring-cloud-sleuth/docs/current-SNAPSHOT/reference/html/)
-, and [Jaeger](https://www.jaegertracing.io/).
-Sleuth offers a convenient autoconfiguration that works out-of-the-box with popular frameworks like Spring MVC and Webflux.
-It allows injecting trace and span ids automatically and displaying this information in the logs, as well as annotation-based span control.
-In order to make it work with Jaeger, we need to enable the zipkin collector port in Jaeger's configuration.
-
-**Jaeger Home Page**
-![Jaeger Home](/diagrams/jaeger-home.png)
-
-**Jaeger Trace Details**
-![Jaeger Trace Details](/diagrams/jaeger-trace.png)
-
-**Jaeger Dependency Graph**
-![Jaeger Dep Graph](/diagrams/jaeger-dep-graph.png)
-
 
 #### Testing & debugging
 TODO
@@ -261,7 +273,7 @@ When the containers are up and running, you can visit consul's UI to see the act
 curl --location --request POST 'localhost:8000/otp-service/v1/otp' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "msisdn": "12345"
+    "msisdn": "+306933177321"
 }'
 ```
 
@@ -275,24 +287,14 @@ curl --location --request GET 'localhost:8000/otp-service/v1/otp'
 curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=petros@icloud.com' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "msisdn": "12345"
+    "msisdn": "+306933177321"
 }'
 ```
 
 **Validate OTP** 
 ```
-curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=petros@icloud.com' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "msisdn": "12345"
-}'
+curl --location --request POST 'http://localhost:8000/otp-service/v1/otp/36/validate?pin=356775' \
 ```
-
-#### Integration tests
-mvn clean verify
-
-#### Live tests
-docker-compose up --build
 
 ## Conclusion
 
