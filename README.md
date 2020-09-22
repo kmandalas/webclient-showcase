@@ -49,7 +49,6 @@ We are going to implement a simplified One Time Password (OTP) service, offering
 * Validate (use) OTP
 * Resend OTP
 * Get OTP status
-* OTP events status
 * Get all OTPs
 
 Our application will consist of the following microservices:
@@ -79,8 +78,6 @@ Spring Boot. We will also bring Spring Data R2DBC into play in order to integrat
 A diagram of our components is shown below:
 
 ![Image of Microservices](/diagrams/WebClientShowcase.png)
-
-We have Integration tests covering each microservice endpoint and we use [HoverFly](http://hoverfly.io) and [Testcontainers](https://www.testcontainers.org) for this purpose. 
 
 #### generate OTP
 
@@ -184,14 +181,15 @@ Sleuth offers a convenient auto-configuration that works out-of-the-box with pop
 It allows injecting trace and span IDs automatically and displaying this information in the logs, as well as annotation-based span control.
 In order to make it work with Jaeger, we need to enable the *Zipkin* collector port in Jaeger's configuration.
 
-One thing to have in mind that limitations do exist here as well. For example tracing database calls with R2DBC is not yet supported. You may
-find the related issue here:
+One thing to have in mind is that limitations do exist here as well. For example tracing database calls with R2DBC is not yet supported. 
+You may find the related issue here:
 * https://github.com/spring-cloud/spring-cloud-sleuth/issues/1524
 
-**Jaeger Home Page**
+Following is screenshot of Jarger UI homepage:
+
 ![Jaeger Home](/diagrams/jaeger-home.png)
 
-**Jaeger Trace Details**
+And this is an example of tracing the call which generates OTPs:
 ![Jaeger Trace Details](/diagrams/jaeger-trace.png)
 
 
@@ -251,8 +249,24 @@ TODO
 
 
 #### Testing & debugging
-TODO
 
+In our sample project we show an example Integration Test covering our most "complicated" endpoint which is the one that generates an OTP. 
+We use [HoverFly](http://hoverfly.io) for mocking responses of the two "external" services (i.e. number-information and notification-service) 
+and the call to our "internal" service (i.e. customer-service). We also use [Testcontainers](https://www.testcontainers.org) for spinning-up 
+a dockerized PostgresDB during the test's execution. 
+
+The full code can be seen in [OTPControllerIntegrationTests](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/test/java/gr/kmandalas/service/otp/OTPControllerIntegrationTests.java) class: 
+
+We also use `WebTestClient` which is a Client for testing web servers that uses WebClient internally to
+perform requests while also providing a fluent API to verify responses. This client can connect to any server over HTTP, or to a WebFlux 
+application via mock request and response objects.
+
+One thing worthwhile to mention is the "trick" we perform in order to simulate the existence of **customer-service** `ServiceInstance`.
+A `ServiceInstance` represents an instance of a service in a discovery system. When running integration tests, we usually have part of cloud 
+features disabled and service discovery is one of them. However, since we use `@LoadBalanced` WebClient when we invoke the **customer-service**
+during the integration flow we test, we need a way to simulate a "static" instance of this service. Moreover we need to "bind" it with
+HoverFly so when it's actually invoked to return the mocked response we want. This is achieved with the 
+`gr.kmandalas.service.otp.OTPControllerIntegrationTests.TestConfig` static class.
 
 #### Async SOAP
 Based on [6] but can be done with with ApacheCXF as well
@@ -267,6 +281,10 @@ The easiest way is to run the microservices using Docker Compose
 When the containers are up and running, you can visit consul's UI to see the active services
 
 > http://localhost:8500/ui/dc1/services
+
+![Image of Consul console](/diagrams/consul.png)
+
+Below you may find `curl` commands for invoking the various endpoints via our API Gateway:
 
 **Generate OTP** 
 ```
