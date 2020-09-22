@@ -5,9 +5,13 @@ import gr.kmandalas.service.notification.dto.NotificationResultDTO;
 import gr.kmandalas.service.notification.enums.Channel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/notifications")
@@ -18,6 +22,13 @@ public class NotificationController {
     public ResponseEntity<NotificationResultDTO> sendNotification(@RequestBody @Valid NotificationRequestForm form) {
         try {
             Channel notificationMethod = Channel.valueOf(form.getChannel());
+
+			try {
+				TimeUnit.SECONDS.sleep(2);
+			} catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+			}
+
             return ResponseEntity.ok()
                     .body(NotificationResultDTO.builder()
                             .status("OK")

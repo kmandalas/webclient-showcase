@@ -273,7 +273,7 @@ When the containers are up and running, you can visit consul's UI to see the act
 curl --location --request POST 'localhost:8000/otp-service/v1/otp' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "msisdn": "+306933177321"
+    "msisdn": "00306933177321"
 }'
 ```
 
@@ -284,11 +284,8 @@ curl --location --request GET 'localhost:8000/otp-service/v1/otp'
 
 **Resend OTP** 
 ```
-curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=petros@icloud.com' \
+curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMAIL,VOICE&mail=john.doe@gmail.com' \
 --header 'Content-Type: application/json' \
---data-raw '{
-    "msisdn": "+306933177321"
-}'
 ```
 
 **Validate OTP** 

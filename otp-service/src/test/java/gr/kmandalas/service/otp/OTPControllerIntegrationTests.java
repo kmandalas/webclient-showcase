@@ -130,7 +130,7 @@ public class OTPControllerIntegrationTests {
 	void testSend_success() throws Exception {
 
 		SendForm requestForm = new SendForm();
-		requestForm.setMsisdn("+306933177321");
+		requestForm.setMsisdn("00306933177321");
 		webTestClient.post()
 				.uri("/v1/otp")
 				.body(Mono.just(requestForm), SendForm.class)
