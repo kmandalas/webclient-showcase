@@ -239,8 +239,8 @@ public Flux<NotificationResultDTO> checkMsisdns(List<String> msisdns) {
 }
 ```
 
-At the point where we call the ***parallel*** method, it creates a ParallelFlux. This indicates the simultaneous character of the execution.
-At the ***runOn*** method we plugin our task executor and finally we need to specify how to convert ParallelFlux to simple Flux. We select
+At the point where we call the ***parallel*** method, it creates a _ParallelFlux_. This indicates the simultaneous character of the execution.
+At the ***runOn*** method we plugin our task executor and finally we need to specify how to convert _ParallelFlux_ to simple _Flux_. We select
 to do this in a sequential manner while other options exist for the results to follow specific order. For a full list of options you may
 check the [ParallelFlux API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/ParallelFlux.html).
 
@@ -263,7 +263,10 @@ be used in various ways but we recommend to used during the test phase. The only
 </dependency>
 ```
 
-Keep in mind that if use Java 11 and above the following JVM argument is needed for the tool to work properly: `-XX:+AllowRedefinitionToAddDeleteMethods`
+Keep in mind that if go with Java 11 and above, the following JVM argument is needed for the tool to work properly: 
+```
+-XX:+AllowRedefinitionToAddDeleteMethods
+```
 
 #### Testing & debugging
 
