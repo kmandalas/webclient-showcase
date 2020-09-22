@@ -255,7 +255,7 @@ We use [HoverFly](http://hoverfly.io) for mocking responses of the two "external
 and the call to our "internal" service (i.e. customer-service). We also use [Testcontainers](https://www.testcontainers.org) for spinning-up 
 a dockerized PostgresDB during the test's execution. 
 
-The full code can be seen in [OTPControllerIntegrationTests](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/test/java/gr/kmandalas/service/otp/OTPControllerIntegrationTests.java) class: 
+The full code can be seen in [OTPControllerIntegrationTests](https://github.com/kmandalas/webclient-showcase/blob/master/otp-service/src/test/java/gr/kmandalas/service/otp/OTPControllerIntegrationTests.java) class.
 
 We also use `WebTestClient` which is a Client for testing web servers that uses WebClient internally to
 perform requests while also providing a fluent API to verify responses. This client can connect to any server over HTTP, or to a WebFlux 
@@ -269,8 +269,10 @@ HoverFly so when it's actually invoked to return the mocked response we want. Th
 `gr.kmandalas.service.otp.OTPControllerIntegrationTests.TestConfig` static class.
 
 #### Async SOAP
-Based on [6] but can be done with with ApacheCXF as well
 
+Nowadays the majority of the systems we integrate with expose REST endpoints. Its not uncommon however to still have to integrate with
+SOAP-based web services. Both JAX-WS and ApacheCXF allow the generation of non-blocking clients. You may find an example of how to deal
+with such case at [Reactive Web Service Client with JAX-WS](https://godatadriven.com/blog/reactive-web-service-client-with-jax-ws/)
 
 ### How to run
 
