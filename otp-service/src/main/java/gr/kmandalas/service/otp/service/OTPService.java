@@ -172,7 +172,7 @@ public class OTPService {
             .zipWhen(otp -> {
 
                 if (otp.getStatus() != OTPStatus.ACTIVE)
-                    return Mono.error(new OTPException("Error resending OTP", FaultReason.EXPIRED));
+                    return Mono.error(new OTPException("Error resending OTP", FaultReason.INVALID_STATUS));
 
                 List<Mono<NotificationResultDTO>> monoList = channels.stream()
                         .filter(Objects::nonNull)
@@ -182,7 +182,7 @@ public class OTPService {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .body(BodyInserters.fromValue(NotificationRequestForm.builder()
                                         .channel(method)
-                                        .destination( Channel.EMAIL.name().equals(method) ? mail : otp.getMsisdn())
+                                        .destination(Channel.EMAIL.name().equals(method) ? mail : otp.getMsisdn())
                                         .message(otp.getPin().toString())
                                         .build()))
                                 .retrieve()

@@ -14,7 +14,6 @@
 			<pattern>%d{HH:mm:ss} %5p [%X{X-B3-TraceId:-}] - [%thread] %logger{0} - %msg%n</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<!-- rollover daily and when the file reaches 10 MegaBytes -->
 			<fileNamePattern>${LOG_DIR}/archived/otp-service-%d{yyyy-MM-dd}.%i.log
 			</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -24,17 +23,17 @@
 	</appender>
 	<appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
 		<appender-ref ref="STDOUT" />
-		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
-		<queueSize>1</queueSize> <!-- default 256 -->
-		<includeCallerData>false</includeCallerData> <!-- default false -->
-		<neverBlock>true</neverBlock> <!-- default false, set to true to cause the Appender not block the application and just drop the messages -->
+		<discardingThreshold>0</discardingThreshold>
+		<queueSize>1</queueSize>
+		<includeCallerData>false</includeCallerData>
+		<neverBlock>true</neverBlock>
 	</appender>
 	<appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
-		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+		<discardingThreshold>0</discardingThreshold>
 		<appender-ref ref="FILE" />
-		<queueSize>1</queueSize> <!-- default 256 -->
-		<includeCallerData>false</includeCallerData> <!-- default false -->
-		<neverBlock>true</neverBlock> <!-- default false, set to true to cause the Appender not block the application and just drop the messages -->
+		<queueSize>1</queueSize>
+		<includeCallerData>false</includeCallerData>
+		<neverBlock>true</neverBlock>
 	</appender>
 
 	<logger name="gr.kmandalas" level="DEBUG" />
