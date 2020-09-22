@@ -245,8 +245,25 @@ to do this in a sequential manner while other options exist for the results to f
 check the [ParallelFlux API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/ParallelFlux.html).
 
 #### BlockHound
-TODO
 
+The change from blocking to non-blocking code or from imperative to reactive programming is tricky and demands to build up a level of
+experience in order to make your self comfortable. Sometimes it may be hard to detect blocking code in Reactor thread. 
+And this is because we don't need to use ***.block()*** to make things blocking but we can unconsciously introduce blocking by using a 
+library which can block the current thread.
+
+A useful utility to helps us detect some cases is [BlockHound](https://github.com/reactor/BlockHound). It is sponsored by Pivotal and it can 
+be used in various ways but we recommend to used during the test phase. The only thing you need for this is to include the following dependency:
+
+```
+<!-- https://mvnrepository.com/artifact/io.projectreactor.tools/blockhound-junit-platform -->
+<dependency>
+    <groupId>io.projectreactor.tools</groupId>
+    <artifactId>blockhound-junit-platform</artifactId>
+    <version>1.0.4.RELEASE</version>
+</dependency>
+```
+
+Keep in mind that if use Java 11 and above the following JVM argument is needed for the tool to work properly: `-XX:+AllowRedefinitionToAddDeleteMethods`
 
 #### Testing & debugging
 
