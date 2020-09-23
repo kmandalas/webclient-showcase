@@ -12,7 +12,6 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +59,10 @@ public class OTPControllerIntegrationTests {
 		}
 	}
 
-	private static Hoverfly hoverfly;
+	private Hoverfly hoverfly;
 
-	@BeforeAll
-	static void setUp() {
+	@BeforeEach
+	void setUp() {
 		var simulation = dsl(
 				// mock customer service
 				service("http://customer-service")
@@ -130,7 +129,7 @@ public class OTPControllerIntegrationTests {
 	}
 
 	@Test
-	void testSend_success() {
+	void testSend_success() throws Exception {
 
 		SendForm requestForm = new SendForm();
 		requestForm.setMsisdn("1234567891");
