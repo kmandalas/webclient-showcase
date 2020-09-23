@@ -1,5 +1,6 @@
 package gr.kmandalas.service.otp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import gr.kmandalas.service.otp.enumeration.OTPStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,7 @@ public class OTP {
 	@Column("msisdn")
 	private String msisdn;
 
+	@JsonIgnore
 	@Column("pin")
 	private Integer pin;
 

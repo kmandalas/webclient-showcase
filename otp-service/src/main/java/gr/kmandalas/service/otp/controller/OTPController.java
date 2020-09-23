@@ -20,7 +20,6 @@ public class OTPController {
   private final OTPService otpService;
 
   @GetMapping
-  @NewSpan
   public Flux<OTP> getAll(@RequestParam(required = false) Long customerId) {
     return otpService.getAll(customerId);
   }

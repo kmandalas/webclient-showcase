@@ -6,6 +6,7 @@ import gr.kmandalas.service.customer.entity.Customer;
 import gr.kmandalas.service.customer.exception.CustomerNotFoundException;
 import gr.kmandalas.service.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +23,7 @@ public class CustomerService {
      * @param number the phone number of the customer
      * @return customer details
      */
+    @NewSpan
     public Mono<CustomerDTO> findByNumber(String number) {
         return customerRepository.findByNumber(number)
                 .switchIfEmpty(Mono.error(new CustomerNotFoundException("Customer with number: " + number + " not found")))
@@ -39,6 +41,7 @@ public class CustomerService {
      * @param customerForm the form containing the customer's details
      * @return Customer entity mono
      */
+    @NewSpan
     public Mono<CustomerDTO> insertCustomer(CustomerForm customerForm) {
         return customerRepository.save(Customer.builder()
                 .email(customerForm.getEmail())
