@@ -150,6 +150,56 @@ the execution stops immediately. If we want to delay errors and execute all Mono
 
 For a full list of options you may check the [Mono API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html).
 
+#### validate OTP
+
+Business requirement
+
+> Given an existing OTP id and a valid pin
+> 1. fetch the corresponding OTP record from the DB by querying "otp" table by id
+> 2. if found, fetch information of maximum attempts allowed from configuration table "application", otherwise return error
+> 3. perform validations: check if maximum attempts exceeded, check for matching pin, if OTP has expired etc.
+> 4. if validation checks fail, then return error, otherwise update the OTP status to VERIFIED and return success
+> 5. in case of error we need to finally save the updated counter of maximum attempts and OTP status back to the database
+
+We assume here that we can have OTPs associated with applications and we can have different time-to-live periods, different number of
+maximum attempts allowed etc. We keep these configuration data in a second DB table named "application".
+
+Solution
+
+* We start by querying the OTP by id using out reactive CRUD repository. Notice that for such simple queries no implementation is needed
+* We then use the ***switchIfEmpty*** and ***Mono.error*** methods to throw an Exception if no record found. Our `@ControllerAdvice` annotated Bean
+takes cares of all the rest
+* Otherwise if a record is found, we build our next step using ***zipWhen*** to get the maximum number of allowed attempts
+from the "application" table
+* We use again ***flatmap*** to apply our conditional logic on the returned results
+* if all validations pass, we update the OTP's status to VERIFIED and we return the result, otherwise we return Exception via ***Mono.error***.
+Again `OTPControllerAdvice` finishes the job by returning proper status and message
+* We are not done yet though. Even in case of ***Mono.error*** we still need to update things in the databases. This is why we have the
+***doOnError*** method in the end. As the name says, it acts as an error handler so we can put there related actions. It's like a ***finally***
+clause but for errors. Have in mind that ***doOnSuccess*** also exists and other variants as well
+
+Let's pause for a moment here and notice that inside our ***doOnError*** method in the end, we call the ***subscribe*** method. If you check
+Reactor documentation the ***subscribe*** method and its variants are usually used in order to trigger the execution of a reactive chain of
+actions. But so far we did not have it anywhere in the code. And we did not need it since we return either ***Mono*** or ***Flux*** all the way 
+back to our Rest Controllers. They are the ones that perform the ***subscribe*** for us, behind the scenes. And as Rossen Stoyanchev says in
+his must-watch presentation [Guide to "Reactive" for Spring MVC Developers](https://www.youtube.com/watch?v=IZ2SoXUiS7M), 
+"you should keep the flight going" i.e. if possible not block and return Reactive types from your endpoints. On the other hand we need to use
+the **subscribe*** method inside the ***doOnError*** because there we do not return anything, so we need to trigger somehow our 
+Reactive repository in order to execute that update.
+
+#### resend OTP
+
+Business requirement
+
+> Given...
+> 1. 
+> 2. 
+> 3.
+> 4. 
+
+Solution
+
+
 ### Other topics
 
 #### Logging
