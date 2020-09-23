@@ -139,7 +139,8 @@ globalcors:
             allowCredentials: true
 ```
 
-Now that we have these sorted out, let's see which Reactor Publisher functions we can use to get the result:
+Now that we have these sorted out, let's see which Reactor Publisher functions we can use to get the result. You can see the full implementation 
+[here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L91)
 
 * In order to make parallel calls to different endpoints we will use Mono's ***zip*** method. If an error occurs in one of the Monos, 
 the execution stops immediately. If we want to delay errors and execute all Monos, then we can use ***zipDelayError*** instead
@@ -165,6 +166,8 @@ We assume here that we can have OTPs associated with applications and we can hav
 maximum attempts allowed etc. We keep these configuration data in a second DB table named "application".
 
 Solution
+
+You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L211)
 
 * We start by querying the OTP by id using out reactive CRUD repository. Notice that for such simple queries no implementation is needed
 * We then use the ***switchIfEmpty*** and ***Mono.error*** methods to throw an Exception if no record found. Our `@ControllerAdvice` annotated Bean
