@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,7 @@ public class OTPService {
    * Read all OTP's
    * @param customerId optional filter of customerId
    */
+  @NewSpan
   public Flux<OTP> getAll(Long customerId) {
     log.info("Entered getAll with argument: {}", customerId);
     return otpRepository.findAll()
@@ -72,6 +74,7 @@ public class OTPService {
    * Read an already generated OTP
    * @param otpId the OTP id
    */
+  @NewSpan
   public Mono<OTP> get(Long otpId) {
     log.info("Entered get with argument: {}", otpId);
     return otpRepository.findById(otpId)
@@ -82,6 +85,7 @@ public class OTPService {
    * Generate and send an OTP
    * @param form the form
    */
+  @NewSpan
   public Mono<OTP> send(SendForm form) {
     log.info("Entered send with argument: {}", form);
     String customerURI = UriComponentsBuilder
@@ -109,12 +113,10 @@ public class OTPService {
     Mono<String> msisdnStatus = webclient.build()
             .get()
             .uri(numberInfoURI)
-            .exchange()
-            .flatMap(clientResponse -> {
-                if (!clientResponse.statusCode().is2xxSuccessful())
-                    return Mono.error(new OTPException("Error retrieving msisdn status", FaultReason.NUMBER_INFORMATION_ERROR));
-                return clientResponse.bodyToMono(String.class);
-            });
+            .retrieve()
+            .onStatus(HttpStatus::isError,
+                    clientResponse -> Mono.error(new OTPException("Error retrieving msisdn status", FaultReason.NUMBER_INFORMATION_ERROR)))
+            .bodyToMono(String.class);
 
     // Combine the results in a single Mono, that completes when both calls have returned.
     // If an error occurs in one of the Monos, execution stops immediately.
@@ -165,6 +167,7 @@ public class OTPService {
    *
    * @param otpId the OTP id
    */
+  @NewSpan
   public Mono<OTP> resend(Long otpId, List<String> channels, String mail) {
     log.info("Entered resend with arguments: {}, {}, {}", otpId, channels, mail);
     return otpRepository.findById(otpId)
@@ -200,6 +203,7 @@ public class OTPService {
    * @param otpId the OTP id
    * @param pin the OTP PIN number
    */
+  @NewSpan
   public Mono<OTP> validate(Long otpId, Integer pin) {
       log.info("Entered resend with arguments: {}, {}", otpId, pin);
       AtomicReference<FaultReason> faultReason = new AtomicReference<>();
