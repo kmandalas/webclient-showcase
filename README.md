@@ -9,8 +9,8 @@ We will present all these while building a demo project showing various applicat
 We will follow a business problem-solution approach to make things more realistic. This is not intended to cover the majority of the reactive APIs
 but should be enough to give you a good idea what lies ahead if you enter this domain and the learning curve required. 
 
-Apart from Java understanding, a familiarity with Spring Cloud Netflix stack is required, basic knowledge of [Project Reactor](https://projectreactor.io) 
-(what is a Mono, what is a Flux) and the very basics of Docker.
+Apart from Java understanding, a familiarity with Spring Cloud project is required, basic knowledge of [Project Reactor](https://projectreactor.io) 
+(what is a Mono, what is a Flux) and the basics of Spring WebClient.
 
 ## Introduction/scope
 
@@ -81,7 +81,7 @@ A diagram of our components is shown below:
 
 #### generate OTP
 
-Business requirement
+**Business requirement**
 
 > Given the number of a user in [E.164](https://en.wikipedia.org/wiki/E.164) format: 
 > 1. fetch customer data from **customer-service** and in parallel validate the number status using the **number-information** service
@@ -89,7 +89,7 @@ Business requirement
 > 3. invoke the **notification-service** to deliver it
 > 4. return response 
 
-Solution
+**Solution**
  
 First of all, we see that we need to communicate with 1 internal microservice (service-to-service communication) and with 2 external (remote) services.
 
@@ -142,9 +142,12 @@ globalcors:
 Now that we have these sorted out, let's see which Reactor Publisher functions we can use to get the result. You can see the full implementation 
 [here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L91)
 
-* In order to make parallel calls to different endpoints we will use Mono's ***zip*** method. If an error occurs in one of the Monos, 
-the execution stops immediately. If we want to delay errors and execute all Monos, then we can use ***zipDelayError*** instead
-* When these parallel calls complete in order to process the results, chain subsequent actions and return a response, we will use the ***flatMap*** method
+* In order to make parallel calls to different endpoints we will use Mono's ***zip*** method. In general the ***zip*** method and it's variants
+return Tuple objects. These special objects allow us to combine the results of the calls. In our case we get a `Tuple2<CustomerDTO, String>`.
+If an error occurs in one of the Monos, the execution stops immediately. If we want to delay errors and execute all Monos, 
+then we can use ***zipDelayError*** instead
+* When these parallel calls complete in order to process the results, chain subsequent actions and return a response, we will use 
+the ***flatMap*** method
 * Inside the transformer Function of the ***flatMap***, we generate a random PIN and we persist in in the DB using a `ReactiveCrudRepository`
 * We use the ***zipWhen*** method to trigger the notification-service only after the DB interaction has finished
 * Finally, we use ***map*** method in order to select our return value which in our case is the data object that was previously saved in the DB
@@ -153,9 +156,9 @@ For a full list of options you may check the [Mono API](https://projectreactor.i
 
 #### validate OTP
 
-Business requirement
+**Business requirement**
 
-> Given an existing OTP id and a valid pin
+> Given an existing OTP id and a valid pin previously delivered to user's device
 > 1. fetch the corresponding OTP record from the DB by querying "otp" table by id
 > 2. if found, fetch information of maximum attempts allowed from configuration table "application", otherwise return error
 > 3. perform validations: check if maximum attempts exceeded, check for matching pin, if OTP has expired etc.
@@ -165,16 +168,17 @@ Business requirement
 We assume here that we can have OTPs associated with applications and we can have different time-to-live periods, different number of
 maximum attempts allowed etc. We keep these configuration data in a second DB table named "application".
 
-Solution
+**Solution**
 
 You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L211)
 
-* We start by querying the OTP by id using out reactive CRUD repository. Notice that for such simple queries no implementation is needed
+* We start by querying the OTP by id using our reactive CRUD repository. Notice that for such simple queries no implementation is needed
 * We then use the ***switchIfEmpty*** and ***Mono.error*** methods to throw an Exception if no record found. Our `@ControllerAdvice` annotated Bean
 takes cares of all the rest
 * Otherwise if a record is found, we build our next step using ***zipWhen*** to get the maximum number of allowed attempts
 from the "application" table
-* We use again ***flatmap*** to apply our conditional logic on the returned results
+* We use again ***flatmap*** to apply our conditional logic on the returned results. Notice that the previous call to ***zipWhen*** gives as
+a Tuple namely a `Tuple2<OTP, Application>` allowing as to have access to these objects and the information they hold 
 * if all validations pass, we update the OTP's status to VERIFIED and we return the result, otherwise we return Exception via ***Mono.error***.
 Again `OTPControllerAdvice` finishes the job by returning proper status and message
 * We are not done yet though. Even in case of ***Mono.error*** we still need to update things in the databases. This is why we have the
@@ -192,16 +196,31 @@ Reactive repository in order to execute that update.
 
 #### resend OTP
 
-Business requirement
+**Business requirement**
 
-> Given...
-> 1. 
-> 2. 
-> 3.
-> 4. 
+> Given Given an existing OTP id give the possibility to be re-sent, to multiple channels (SMS, e-mail, Viber etc.) in parallel
+> 1. fetch the corresponding OTP record from the DB by querying "otp" table by id
+> 2. if found, proceed re-sending it to the customer via multiple channels and simultaneously via the notification-service
+> 3. if not found or its status is no longer valid (e.g. EXPIRED), return error
 
-Solution
+**Solution**
 
+Our focus here is to demonstrate parallel calls the the same endpoint. In our first use case we saw how we can make parallel calls to 
+different endpoints, returning different types using ***Mono.zip***. Now we will use ***Flux.merge*** instead.
+
+You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/a8ee56488fe5cfc7a8771fc37c4b18646bbd04ab/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L174)
+
+Let's see how we approached this:
+
+* Like before we start by querying the OTP by id 
+* With the ***switchIfEmpty*** and ***Mono.error*** we return the proper error if the OTP id passed does not exist
+* We continue with ***zipWhen*** cause we want to perform the next steps after the information from the database is retrieved
+* Inside the ***zipWhen***, apart from an OTP status check, we iterate the list of Channels passed and prepare a list of remote calls which
+will be the list of "sources" to our Flux
+* Then we pass this `Iterable` of sources to ***Flux.merge*** and we return it after we have collected all responses from the notification-service
+to a `List<Mono<NotificationResultDTO>>`. We don't anything with these in our example but we could for example log them or check something 
+else from the data they carry if needed
+* Finally because we need to return only the OTP from our Tuple of results, we perform a ***map*** operation
 
 ### Other topics
 
@@ -242,8 +261,11 @@ Following is screenshot of Jarger UI homepage:
 
 ![Jaeger Home](/diagrams/jaeger-home.png)
 
-And this is an example of tracing the call which generates OTPs:
+This is an example of tracing the call which generates OTPs:
 ![Jaeger Trace Details](/diagrams/jaeger-trace.png)
+
+This is an example of tracing the call which resends an OTP via multiple channels in parallel:
+![Jaeger Trace Details](/diagrams/flux-merge.png)
 
 
 #### Reactive types support for @Cacheable methods
