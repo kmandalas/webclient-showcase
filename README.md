@@ -140,7 +140,7 @@ globalcors:
 ```
 
 Now that we have these sorted out, let's see which Reactor Publisher functions we can use to get the result. You can see the full implementation 
-[here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L91)
+[here](https://github.com/kmandalas/webclient-showcase/blob/1959825423f46ce9b693373744a3da1f7026e9c1/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L66)
 
 * In order to make parallel calls to different endpoints we will use Mono's ***zip*** method. In general the ***zip*** method and it's variants
 return Tuple objects. These special objects allow us to combine the results of the calls. In our case we get a `Tuple2<CustomerDTO, String>`.
@@ -170,7 +170,7 @@ maximum attempts allowed etc. We keep these configuration data in a second DB ta
 
 **Solution**
 
-You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/8a18b4e4de9c91cbafe824bda96e81a662af6435/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L211)
+You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/1959825423f46ce9b693373744a3da1f7026e9c1/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L148)
 
 * We start by querying the OTP by id using our reactive CRUD repository. Notice that for such simple queries no implementation is needed
 * We then use the ***switchIfEmpty*** and ***Mono.error*** methods to throw an Exception if no record found. Our `@ControllerAdvice` annotated Bean
@@ -208,7 +208,7 @@ Reactive repository in order to execute that update.
 Our focus here is to demonstrate parallel calls the the same endpoint. In our first use case we saw how we can make parallel calls to 
 different endpoints, returning different types using ***Mono.zip***. Now we will use ***Flux.merge*** instead.
 
-You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/a8ee56488fe5cfc7a8771fc37c4b18646bbd04ab/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L174)
+You can check the implementation [here](https://github.com/kmandalas/webclient-showcase/blob/1959825423f46ce9b693373744a3da1f7026e9c1/otp-service/src/main/java/gr/kmandalas/service/otp/service/OTPService.java#L202)
 
 Let's see how we approached this:
 
@@ -256,7 +256,7 @@ The AsyncAppender has five (5) configuration options:
 * **_neverBlock_** – Setting it to true will prevent any blocking on the application threads but it comes at the cost of lost log events if 
 the AsyncAppender’s internal buffer fills up. Default value is false.
 * **_includeCallerData_** – Extracting caller data. Default value is false.
-* **_maxFlushTime_** – Specify a maximum queue flush timeout in milliseconds
+* **_maxFlushTime_** – Specify a maximum queue flush timeout in milliseconds.
 
 #### Distributed Tracing
 
@@ -271,7 +271,7 @@ One thing to have in mind is that limitations do exist here as well. For example
 You may find the related issue here:
 * https://github.com/spring-cloud/spring-cloud-sleuth/issues/1524
 
-Following is screenshot of Jarger UI homepage:
+Following is screenshot of Jaeger UI homepage:
 
 ![Jaeger Home](/diagrams/jaeger-home.png)
 
@@ -385,7 +385,7 @@ with such case at [Reactive Web Service Client with JAX-WS](https://godatadriven
 
 ### How to run
 
-In order to build and test the appication, the prerequisites are:
+In order to build and test the application, the prerequisites are:
 * Java 11 and above
 * Maven
 * Docker (because we use TestContainers during our Integration tests)
