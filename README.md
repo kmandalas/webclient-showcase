@@ -186,7 +186,7 @@ Again `OTPControllerAdvice` finishes the job by returning proper status and mess
 clause but for errors. Have in mind that ***doOnSuccess*** also exists and other variants as well
 
 Let's pause for a moment here and notice that inside our ***doOnError*** method in the end, we call the ***subscribe*** method. If you check
-Reactor documentation the ***subscribe*** method and its variants are usually used in order to trigger the execution of a reactive chain of
+the Reactor documentation, the ***subscribe*** method and its variants are usually used in order to trigger the execution of a reactive chain of
 actions. But so far we did not have it anywhere in the code. And we did not need it since we return either ***Mono*** or ***Flux*** all the way 
 back to our Rest Controllers. They are the ones that perform the ***subscribe*** for us, behind the scenes. And as Rossen Stoyanchev says in
 his must-watch presentation [Guide to "Reactive" for Spring MVC Developers](https://www.youtube.com/watch?v=IZ2SoXUiS7M), 
@@ -449,6 +449,9 @@ Some interesting load testing and comparison results are presented at [[4]](http
 The conclusion is that Spring Webflux with WebClient and Apache clients "win" in all cases. 
 The most significant difference (4 times faster than blocking Servlet) comes when underlying service is slow (500ms). 
 It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it does not create a lot of threads comparing with Servlet (20 vs 220).
+
+So if you are up to start building Reactive Microservices with Spring and eager to take advantage of the benefits above, we hope we gave a quite
+good picture of the challenges that lie ahead and the amount of preparation needed.
 
 ## References
 
