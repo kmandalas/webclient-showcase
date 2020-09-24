@@ -413,9 +413,9 @@ curl --location --request POST 'localhost:8000/otp-service/v1/otp' \
 }'
 ```
 
-**Get All OTP** 
+**Validate OTP** 
 ```
-curl --location --request GET 'localhost:8000/otp-service/v1/otp'
+curl --location --request POST 'http://localhost:8000/otp-service/v1/otp/36/validate?pin=356775' \
 ```
 
 **Resend OTP** 
@@ -424,9 +424,14 @@ curl --location --request POST 'localhost:8000/otp-service/v1/otp/2?via=AUTO,EMA
 --header 'Content-Type: application/json' \
 ```
 
-**Validate OTP** 
+**Get All OTPs** 
 ```
-curl --location --request POST 'http://localhost:8000/otp-service/v1/otp/36/validate?pin=356775' \
+curl --location --request GET 'localhost:8000/otp-service/v1/otp?number=00306933177321'
+```
+
+**OTP Status** 
+```
+curl --location --request GET 'localhost:8000/otp-service/v1/otp/1'
 ```
 
 ## Conclusion

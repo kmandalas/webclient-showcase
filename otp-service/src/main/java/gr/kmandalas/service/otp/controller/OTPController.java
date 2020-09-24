@@ -34,7 +34,7 @@ public class OTPController {
 	}
 
 	@GetMapping
-	public Flux<OTP> getAll(@RequestParam(required = false) String number) {
+	public Flux<OTP> getAll(@RequestParam String number) {
 		return otpService.getAll(number);
 	}
 

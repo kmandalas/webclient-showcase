@@ -58,32 +58,6 @@ public class OTPService {
 	private String notificationServiceUrl;
 
 	/**
-	 * Read all OTPs of a given number
-	 *
-	 * @param number the user's msisdn
-	 */
-	@NewSpan
-	public Flux<OTP> getAll(String number) {
-		log.info("Entered getAll with argument: {}", number);
-
-		return otpRepository.findByMsisdn(number)
-				.switchIfEmpty(Mono.error(new OTPException("OTPs not found", FaultReason.NOT_FOUND)));
-	}
-
-	/**
-	 * Read an already generated OTP
-	 *
-	 * @param otpId the OTP id
-	 */
-	@NewSpan
-	public Mono<OTP> get(Long otpId) {
-		log.info("Entered get with argument: {}", otpId);
-
-		return otpRepository.findById(otpId)
-				.switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
-	}
-
-	/**
 	 * Generate and send an OTP
 	 *
 	 * @param form the {@link SendForm}
@@ -165,44 +139,6 @@ public class OTPService {
 	}
 
 	/**
-	 * Resend an already generated OTP to a number of communication channels.
-	 *
-	 * @param otpId    the OTP id
-	 * @param channels the list of communication {@link Channel}
-	 * @param mail     the user's alternate email address for receiving notifications
-	 */
-	@NewSpan
-	public Mono<OTP> resend(Long otpId, List<String> channels, String mail) {
-		log.info("Entered resend with arguments: {}, {}, {}", otpId, channels, mail);
-
-		return otpRepository.findById(otpId)
-				.switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
-				.zipWhen(otp -> {
-
-					if (otp.getStatus() != OTPStatus.ACTIVE)
-						return Mono.error(new OTPException("Error resending OTP", FaultReason.INVALID_STATUS));
-
-					List<Mono<NotificationResultDTO>> monoList = channels.stream()
-							.filter(Objects::nonNull)
-							.map(method -> webclient.build()
-									.post()
-									.uri(notificationServiceUrl)
-									.accept(MediaType.APPLICATION_JSON)
-									.body(BodyInserters.fromValue(NotificationRequestForm.builder()
-											.channel(method)
-											.destination(Channel.EMAIL.name().equals(method) ? mail : otp.getMsisdn())
-											.message(otp.getPin().toString())
-											.build()))
-									.retrieve()
-									.bodyToMono(NotificationResultDTO.class))
-							.collect(Collectors.toList());
-
-					return Flux.merge(monoList).collectList();
-				})
-				.map(Tuple2::getT1);
-	}
-
-	/**
 	 * Validates an OTP and updates its status as {@link OTPStatus#ACTIVE} on success
 	 *
 	 * @param otpId the OTP id
@@ -253,6 +189,70 @@ public class OTPService {
 						}
 					}
 				});
+	}
+
+	/**
+	 * Resend an already generated OTP to a number of communication channels.
+	 *
+	 * @param otpId    the OTP id
+	 * @param channels the list of communication {@link Channel}
+	 * @param mail     the user's alternate email address for receiving notifications
+	 */
+	@NewSpan
+	public Mono<OTP> resend(Long otpId, List<String> channels, String mail) {
+		log.info("Entered resend with arguments: {}, {}, {}", otpId, channels, mail);
+
+		return otpRepository.findById(otpId)
+				.switchIfEmpty(Mono.error(new OTPException("Error resending OTP", FaultReason.NOT_FOUND)))
+				.zipWhen(otp -> {
+
+					if (otp.getStatus() != OTPStatus.ACTIVE)
+						return Mono.error(new OTPException("Error resending OTP", FaultReason.INVALID_STATUS));
+
+					List<Mono<NotificationResultDTO>> monoList = channels.stream()
+							.filter(Objects::nonNull)
+							.map(method -> webclient.build()
+									.post()
+									.uri(notificationServiceUrl)
+									.accept(MediaType.APPLICATION_JSON)
+									.body(BodyInserters.fromValue(NotificationRequestForm.builder()
+											.channel(method)
+											.destination(Channel.EMAIL.name().equals(method) ? mail : otp.getMsisdn())
+											.message(otp.getPin().toString())
+											.build()))
+									.retrieve()
+									.bodyToMono(NotificationResultDTO.class))
+							.collect(Collectors.toList());
+
+					return Flux.merge(monoList).collectList();
+				})
+				.map(Tuple2::getT1);
+	}
+
+	/**
+	 * Read all OTPs of a given number
+	 *
+	 * @param number the user's msisdn
+	 */
+	@NewSpan
+	public Flux<OTP> getAll(String number) {
+		log.info("Entered getAll with argument: {}", number);
+
+		return otpRepository.findByMsisdn(number)
+				.switchIfEmpty(Mono.error(new OTPException("OTPs not found", FaultReason.NOT_FOUND)));
+	}
+
+	/**
+	 * Read an already generated OTP
+	 *
+	 * @param otpId the OTP id
+	 */
+	@NewSpan
+	public Mono<OTP> get(Long otpId) {
+		log.info("Entered get with argument: {}", otpId);
+
+		return otpRepository.findById(otpId)
+				.switchIfEmpty(Mono.error(new OTPException("OTP not found", FaultReason.NOT_FOUND)));
 	}
 
 }
