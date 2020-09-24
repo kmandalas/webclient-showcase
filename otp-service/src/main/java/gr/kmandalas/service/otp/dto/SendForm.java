@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class SendForm {
 
-  private String msisdn;
+	private String msisdn;
+	// add your extra inputs here...
 
 }

@@ -49,7 +49,7 @@ We are going to implement a simplified One Time Password (OTP) service, offering
 * Validate (use) OTP
 * Resend OTP
 * Get OTP status
-* Get all OTPs
+* Get all OTPs of a given number
 
 Our application will consist of the following microservices:
 
@@ -79,7 +79,7 @@ A diagram of our components is shown below:
 
 ![Image of Microservices](/diagrams/WebClientShowcase.png)
 
-#### generate OTP
+#### I. Generate OTP
 
 **Business requirement**
 
@@ -154,7 +154,7 @@ the ***flatMap*** method
 
 For a full list of options you may check the [Mono API](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html).
 
-#### validate OTP
+#### II. Validate OTP
 
 **Business requirement**
 
@@ -194,7 +194,7 @@ his must-watch presentation [Guide to "Reactive" for Spring MVC Developers](http
 the **subscribe*** method inside the ***doOnError*** because there we do not return anything, so we need to trigger somehow our 
 Reactive repository in order to execute that update.
 
-#### resend OTP
+#### III. Resend OTP
 
 **Business requirement**
 
@@ -221,6 +221,20 @@ will be the list of "sources" to our Flux
 to a `List<Mono<NotificationResultDTO>>`. We don't anything with these in our example but we could for example log them or check something 
 else from the data they carry if needed
 * Finally because we need to return only the OTP from our Tuple of results, we perform a ***map*** operation
+
+#### IV. Get all OTPs and OTP status
+
+**Business requirement**
+
+> Get back a list of OTPs for a given MSISDN and a single OTP by id for checking its status
+
+**Solution**
+
+We left the more straightforward cases for the end since you will find many examples simply returning Flux or Mono usually by querying
+a Relational of NoSQL database with reactive drivers support. Keep in mind though that in case of relational databases, Spring Data R2DBC
+(R2DBC stands for Reactive Relational Database Connectivity) does not offer many features of ORM frameworks (JPA, Hibernate). Its primary
+target is to be a simple, limited, opinionated object mapper. So if you are used in your past projects to JPA and Hibernate then prepare
+for a mindshift about this part as well.
 
 ### Other topics
 
@@ -343,7 +357,7 @@ Keep in mind that if go with Java 11 and above, the following JVM argument is ne
 -XX:+AllowRedefinitionToAddDeleteMethods
 ```
 
-#### Testing & debugging
+#### Integration Testing
 
 In our sample project we show an example Integration Test covering our most "complicated" endpoint which is the one that generates an OTP. 
 We use [HoverFly](http://hoverfly.io) for mocking responses of the two "external" services (i.e. number-information and notification-service) 
@@ -371,11 +385,18 @@ with such case at [Reactive Web Service Client with JAX-WS](https://godatadriven
 
 ### How to run
 
-The easiest way is to run the microservices using Docker Compose
+In order to build and test the appication, the prerequisites are:
+* Java 11 and above
+* Maven
+* Docker (because we use TestContainers during our Integration tests)
+
+Then simply execute a `mvn clean verify`
+
+The easiest way is to run the microservices using Docker and Docker Compose:
 
 > docker-compose up --build
 
-When the containers are up and running, you can visit consul's UI to see the active services
+When the containers are up and running, you can visit consul's UI to see the active services:
 
 > http://localhost:8500/ui/dc1/services
 
@@ -446,7 +467,7 @@ It's 15–20% faster then non-blocking Servlet with `CompetableFuture`. Also, it
 
 [10] https://cloud.spring.io/spring-cloud-static/spring-cloud-commons/2.1.6.RELEASE/multi/multi__spring_cloud_commons_common_abstractions.html#_spring_webclient_as_a_load_balancer_client
 
-### TODO
+### Things covered
 
 - [x] WebClient simple usage
 - [x] Parallel calls to the same endpoint

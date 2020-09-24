@@ -8,10 +8,12 @@ import reactor.core.publisher.Mono;
 
 public interface OTPRepository extends ReactiveCrudRepository<OTP, Long> {
 
-  Flux<OTP> findByCustomerId(Long customerId);
+	Flux<OTP> findByMsisdn(String number);
 
-  Mono<OTP> findByIdAndStatus(Long otpId, OTPStatus status);
+	Flux<OTP> findByCustomerId(Long customerId);
 
-  Mono<OTP> findByIdAndPinAndStatus(Long otpId, Integer pin, OTPStatus status);
+	Mono<OTP> findByIdAndStatus(Long otpId, OTPStatus status);
+
+	Mono<OTP> findByIdAndPinAndStatus(Long otpId, Integer pin, OTPStatus status);
 
 }

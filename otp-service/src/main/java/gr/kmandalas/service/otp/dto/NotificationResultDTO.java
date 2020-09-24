@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationResultDTO {
 
-    private String status;
-    private String message;
+	private String status;
+	private String message;
 
 }
