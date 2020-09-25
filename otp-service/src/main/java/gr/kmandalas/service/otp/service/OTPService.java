@@ -16,13 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.blockhound.BlockHound;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -62,7 +62,7 @@ public class OTPService {
 	 *
 	 * @param form the {@link SendForm}
 	 */
-	@NewSpan
+	// @NewSpan
 	public Mono<OTP> send(SendForm form) {
 		log.info("Entered send with argument: {}", form);
 
@@ -144,7 +144,7 @@ public class OTPService {
 	 * @param otpId the OTP id
 	 * @param pin   the OTP PIN number
 	 */
-	@NewSpan
+	// @NewSpan
 	public Mono<OTP> validate(Long otpId, Integer pin) {
 		log.info("Entered resend with arguments: {}, {}", otpId, pin);
 
@@ -198,7 +198,7 @@ public class OTPService {
 	 * @param channels the list of communication {@link Channel}
 	 * @param mail     the user's alternate email address for receiving notifications
 	 */
-	@NewSpan
+	// @NewSpan
 	public Mono<OTP> resend(Long otpId, List<String> channels, String mail) {
 		log.info("Entered resend with arguments: {}, {}, {}", otpId, channels, mail);
 
@@ -234,8 +234,9 @@ public class OTPService {
 	 *
 	 * @param number the user's msisdn
 	 */
-	@NewSpan
+	// @NewSpan
 	public Flux<OTP> getAll(String number) {
+		BlockHound.install();
 		log.info("Entered getAll with argument: {}", number);
 
 		return otpRepository.findByMsisdn(number)
@@ -247,7 +248,7 @@ public class OTPService {
 	 *
 	 * @param otpId the OTP id
 	 */
-	@NewSpan
+	// @NewSpan
 	public Mono<OTP> get(Long otpId) {
 		log.info("Entered get with argument: {}", otpId);
 
