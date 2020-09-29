@@ -1,9 +1,28 @@
 ![Java CI with Maven](https://github.com/kmandalas/webclient-showcase/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 # webclient-showcase
-This projects article aims to be an introduction to developing Reactive Microservices based on the Spring framework. 
+This projects article aims to be an introduction to developing Reactive Microservices based on the Spring framework.
+
+We are going to implement a simplified One Time Password (OTP) service, offering the following capabilities:
+
+* Generate OTP
+* Validate (use) OTP
+* Resend OTP
+* Get OTP status
+* Get all OTPs of a given number
+
+Our application will consist of the following microservices:
+
+* **otp-service:** which will provide the functionality above by orchestrating calls to local and remote services 
+* **customer-service:** will keep a catalogue of registered users to our service with information like: account id, MSISDN, e-mail etc.
 
 ![Image of Microservices](/diagrams/WebClientShowcase.png)
+
+A number of remote (external) services will be invoked. We assume that our application is authorized to use them will access them via their REST API.
+Of course these will be mocked for simplicity. These "3rd-party" services are:
+
+* **number-information:** takes a phone number as input and verifies that it belongs to a Telecoms operator and is currently active
+* **notification-service:** delivers the generated OTPs to the designated number or channel (phone, e-mail, messenger etc.)
 
 
 ### How to run
