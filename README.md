@@ -16,8 +16,6 @@ Our application will consist of the following microservices:
 * **otp-service:** which will provide the functionality above by orchestrating calls to local and remote services 
 * **customer-service:** will keep a catalogue of registered users to our service with information like: account id, MSISDN, e-mail etc.
 
-![Image of Microservices](/diagrams/WebClientShowcase.png)
-
 A number of remote (external) services will be invoked. We assume that our application is authorized to use them will access them via their REST API.
 Of course these will be mocked for simplicity. These "3rd-party" services are:
 
@@ -41,8 +39,6 @@ The easiest way is to run the microservices using Docker and Docker Compose:
 When the containers are up and running, you can visit consul's UI to see the active services:
 
 > http://localhost:8500/ui/dc1/services
-
-![Image of Consul console](/diagrams/consul.png)
 
 Below you may find `curl` commands for invoking the various endpoints via our API Gateway:
 
