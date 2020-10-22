@@ -2,7 +2,7 @@
 
 # webclient-showcase
 This demo project aims to be an introduction to developing Reactive Microservices based on the Spring framework.
-Checkout our related article on Dzone here: https://dzone.com/articles/spring-reactive-microservices-a-showcase
+For a complete guidem check our related article on Dzone here: https://dzone.com/articles/spring-reactive-microservices-a-showcase
 
 We are going to implement a simplified One Time Password (OTP) service, offering the following capabilities:
 
