@@ -1,7 +1,8 @@
 ![Java CI with Maven](https://github.com/kmandalas/webclient-showcase/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 # webclient-showcase
-This projects article aims to be an introduction to developing Reactive Microservices based on the Spring framework.
+This demo project aims to be an introduction to developing Reactive Microservices based on the Spring framework.
+Checkout our related article on Dzone here: https://dzone.com/articles/spring-reactive-microservices-a-showcase
 
 We are going to implement a simplified One Time Password (OTP) service, offering the following capabilities:
 
